@@ -1,3 +1,5 @@
+# src/server/auth/auth.py
+
 # Sets up authentication token based API
 
 from functools import wraps
@@ -5,7 +7,7 @@ from functools import wraps
 import jwt
 from flask import request, abort
 from flask import current_app
-from models import Client
+from src.server.auth.models import Client
 
 
 def token_required(f):
@@ -49,6 +51,6 @@ def token_required(f):
                 "status": "Internal Server Error",
             }, 500
 
-        return f(current_client, *args, **kwargs)
+        return f(*args, **kwargs)
 
     return decorated

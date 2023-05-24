@@ -26,5 +26,5 @@ migrate.init_app(app, db)
 from src.server.auth.views import auth_blueprint
 app.register_blueprint(auth_blueprint)
 
-from src.server.main import rlservice_blueprint
+from server.app import rlservice_blueprint
 app.register_blueprint(rlservice_blueprint)

@@ -27,7 +27,7 @@ class RegisterAPI(MethodView):
             if number_of_users != 0:
                 responseObject = {
                     'status': 'fail',
-                    'message': 'No more users allowed, please log in.',
+                    'message': 'No more users allowed to register.',
                 }
                 return make_response(jsonify(responseObject)), 202
             else:

@@ -3,6 +3,7 @@
 import os
 import unittest
 import coverage
+import git
 
 from flask.cli import FlaskGroup
 
@@ -17,7 +18,8 @@ COV = coverage.coverage(
 )
 COV.start()
 
-from src.server.auth import app, db, models
+from src.server.auth import models
+from src.server import app, db
 
 cli = FlaskGroup(app)
 
@@ -60,6 +62,22 @@ def create_db():
 def drop_db():
     """Drops the db tables."""
     db.drop_all()
+
+@cli.command("populate_commit_id")
+def populate_commit_id():
+    """Populates the COMMIT_ID in config.ini"""
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    config_file = os.path.join(os.path.dirname(__file__), 'config.ini')
+    with open(config_file, 'r+') as f:
+        lines = f.readlines()
+        for i, line in enumerate(lines):
+            if line.startswith('COMMIT_ID'):
+                lines[i] = 'COMMIT_ID=' + sha + '\n'
+                break
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
 
 
 if __name__ == '__main__':

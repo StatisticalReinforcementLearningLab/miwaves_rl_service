@@ -1,3 +1,5 @@
+# src/server/auth/config.py
+
 import os
 import configparser
 
@@ -7,11 +9,12 @@ config = configparser.ConfigParser()
 config.read(CONFIG_INI)
 
 # Get the database user password and the JWT secret key
+database_username = config['DATABASE']['POSTGRES_USERNAME']
 database_password = config['DATABASE']['POSTGRES_PASSWORD']
 secret_key = config['JWT']['SECRET_KEY']
 
 database_name = 'flask_jwt_auth'
-postgres_local_base = "postgresql://postgres:" + str(database_password) + "@localhost/"
+postgres_local_base = "postgresql://" + str(database_username) + ":" + str(database_password) + "@localhost/"
 
 class BaseConfig:
     """Base configuration."""

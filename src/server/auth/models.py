@@ -1,4 +1,4 @@
-# src/auth/models.py
+# src/server/auth/models.py
 
 import jwt
 import datetime
@@ -15,14 +15,14 @@ class Client(db.Model):
     password = db.Column(db.String(255), nullable=False)
     admin = db.Column(db.Boolean, nullable=False, default=False)
 
-    def __init__(self, username, password, admin=False):
+    def __init__(self, username: str, password: str, admin: bool = False):
         self.username = username
         self.password = bcrypt.generate_password_hash(
             password, app.config.get('BCRYPT_LOG_ROUNDS')
         ).decode()
         self.admin = admin
 
-    def encode_auth_token(self, user_id):
+    def encode_auth_token(self, user_id: int):
         """
         Generates the Auth Token
         :return: string
@@ -42,7 +42,7 @@ class Client(db.Model):
             return e
 
     @staticmethod
-    def decode_auth_token(auth_token):
+    def decode_auth_token(auth_token: str):
         """
         Validates the auth token
         :param auth_token:

@@ -1,4 +1,4 @@
-# src/auth/__init__.py
+# src/server/auth/__init__.py
 
 # import os
 
