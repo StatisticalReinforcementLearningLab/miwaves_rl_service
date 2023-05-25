@@ -25,7 +25,7 @@ CREATE DATABASE flask_jwt_auth_test TABLESPACE miwaves_db;
 python manage.py create_db
 python manage.py db init
 python manage.py db migrate
-python manage.py populate_commit_id
+python manage.py populate_commit_id  # only required one time unless code has changed
 
 # To run the server
 # python manage.py runserver

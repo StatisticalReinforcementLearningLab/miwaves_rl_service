@@ -13,7 +13,7 @@ CORS(app)
 
 app_settings = os.getenv(
     'APP_SETTINGS',
-    'src.server.auth.config.DevelopmentConfig'
+    'src.server.config.DevelopmentConfig'
 )
 app.config.from_object(app_settings)
 
@@ -23,8 +23,10 @@ db = SQLAlchemy(app)
 migrate = Migrate()
 migrate.init_app(app, db)
 
+
+
 from src.server.auth.views import auth_blueprint
 app.register_blueprint(auth_blueprint)
 
-from server.app import rlservice_blueprint
+from src.server.main import rlservice_blueprint
 app.register_blueprint(rlservice_blueprint)

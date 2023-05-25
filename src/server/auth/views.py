@@ -63,7 +63,7 @@ class RegisterAPI(MethodView):
                     return make_response(jsonify(responseObject)), 201
                 except Exception as e:
                     print("Exception: ", e)
-                    import pdb; pdb.set_trace()
+                    # import pdb; pdb.set_trace()
                     responseObject = {
                         'status': 'fail',
                         'message': 'Some error occurred. Please try again.'
@@ -146,6 +146,7 @@ class LogoutAPI(MethodView):
                     }
                     return make_response(jsonify(responseObject)), 200
             else:
+                # import pdb; pdb.set_trace()
                 responseObject = {
                     'status': 'fail',
                     'message': resp

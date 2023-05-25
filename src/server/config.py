@@ -1,7 +1,9 @@
-# src/server/auth/config.py
+# src/server/config.py
 
 import os
 import configparser
+
+from src.algorithm import flat_prob
 
 CONFIG_INI = "config.ini"
 
@@ -12,6 +14,7 @@ config.read(CONFIG_INI)
 database_username = config['DATABASE']['POSTGRES_USERNAME']
 database_password = config['DATABASE']['POSTGRES_PASSWORD']
 secret_key = config['JWT']['SECRET_KEY']
+code_version = config['GIT']['COMMIT_ID']
 
 database_name = 'flask_jwt_auth'
 postgres_local_base = "postgresql://" + str(database_username) + ":" + str(database_password) + "@localhost/"
@@ -22,6 +25,8 @@ class BaseConfig:
     DEBUG = False
     BCRYPT_LOG_ROUNDS = 13
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    CODE_VERSION = code_version
+    ALGORITHM = flat_prob.FlatProbabilityAlgorithm()
 
 
 class DevelopmentConfig(BaseConfig):

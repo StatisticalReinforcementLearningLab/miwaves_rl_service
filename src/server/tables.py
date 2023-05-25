@@ -2,19 +2,12 @@
 
 # Server code that has the database table schemas for the users and algorithms in the trial
 
-import jwt
 import datetime
+import enum
 
-from src.server import app, db, bcrypt
+from src.server import app, db
 from sqlalchemy.dialects.postgresql import ARRAY
 
-
-import configparser
-
-CONFIG_INI = "config.ini"
-
-config = configparser.ConfigParser()
-config.read(CONFIG_INI)
 
 
 class User(db.Model):
@@ -23,8 +16,6 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    gender = db.Column(db.String, nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
     study_level_start_index = db.Column(db.Integer, nullable=True)
@@ -34,16 +25,12 @@ class User(db.Model):
     def __init__(
         self,
         id: int,
-        age: int,
-        gender: str,
         start_date: datetime.date,
         end_date: datetime.date,
         study_level_start_index: int,
         study_level_end_index: int,
     ):
         self.id = id
-        self.age = age
-        self.gender = gender
         self.start_date = start_date
         self.end_date = end_date
         self.study_level_start_index = study_level_start_index
@@ -75,7 +62,7 @@ class User(db.Model):
     #         return 'Invalid token. Please log in again.'
 
 
-class UserStudyPhaseEnum(db.enum.Enum):
+class UserStudyPhaseEnum(enum.Enum):
     """Indicates the user's study phase as an enum"""
 
     REGISTERED = 1
@@ -149,7 +136,7 @@ class RLWeights(db.Model):
     noise_var = db.Column(db.Float, nullable=False)
     random_eff_cov_array = db.Column(ARRAY(db.Float), nullable=False)
     code_commit_id = db.Column(
-        db.String, nullable=False, default=config["GIT"]["COMMIT_ID"]
+        db.String, nullable=False, default=app.config.get("CODE_VERSION")
     )
 
     def __init__(
@@ -159,7 +146,7 @@ class RLWeights(db.Model):
         posterior_var_array: list,
         noise_var: float,
         random_eff_cov_array: list,
-        code_commit_id: str = config["GIT"]["COMMIT_ID"],
+        code_commit_id: str = app.config.get("CODE_VERSION"),
     ):
         self.update_timestamp = update_timestamp
         self.posterior_mean_array = posterior_mean_array

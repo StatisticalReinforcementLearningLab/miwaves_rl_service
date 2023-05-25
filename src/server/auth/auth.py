@@ -41,8 +41,6 @@ def token_required(f):
                     "data": None,
                     "status": "Unauthorized",
                 }, 401
-            if not current_client["active"]:
-                abort(403)
         except Exception as e:
             print(e)
             return {
