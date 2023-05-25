@@ -27,6 +27,8 @@ python manage.py db init
 python manage.py db migrate
 python manage.py populate_commit_id  # only required one time unless code has changed
 
+# Export the FLASK_APP environment variable
+
 # To run the server
 # python manage.py runserver
 flask run
