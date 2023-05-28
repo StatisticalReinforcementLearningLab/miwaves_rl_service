@@ -57,9 +57,6 @@ class Client(db.Model):
         except jwt.ExpiredSignatureError:
             return "Signature expired. Please log in again."
         except jwt.InvalidTokenError:
-            import pdb
-
-            pdb.set_trace()
             return "Invalid token. Please log in again."
 
 

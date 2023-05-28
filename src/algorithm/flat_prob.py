@@ -13,13 +13,14 @@ class FlatProbabilityAlgorithm(RLAlgorithm):
         :param prob: probability of taking action
         '''
         self.prob = prob
+        self.policyid = 0
 
-    def get_action(self, user: int, state: np.ndarray, seed: int = -1) -> tuple:
+    def get_action(self, user_id: int, state: np.ndarray, decision_time: int, seed: int = -1) -> tuple:
         '''
         Get action
         :param state: state of the user
         :param seed: seed for random number generator
-        :return: action, seed, probability of taking action
+        :return: action, seed, probability of taking action, and policy id
         '''
 
         if seed != -1:
@@ -37,7 +38,7 @@ class FlatProbabilityAlgorithm(RLAlgorithm):
         # get action
         action = np.random.binomial(1, self.prob)
 
-        return action, seed, self.prob
+        return action, seed, self.prob, self.policyid
 
     def update(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray):
         '''
@@ -47,7 +48,7 @@ class FlatProbabilityAlgorithm(RLAlgorithm):
         :param reward: reward received
         :param next_state: next state of the user
         '''
-        pass
+        self.policyid += 1
 
     @staticmethod
     def make_state(params: dict) -> np.ndarray:
@@ -66,3 +67,12 @@ class FlatProbabilityAlgorithm(RLAlgorithm):
         :return: reward
         '''
         pass
+
+    def get_policyid(self) -> int:
+        '''
+        Get policy id
+        This is used to check if the algorithm has been updated
+        Only used for testing
+        :return: policy id
+        '''
+        return self.policyid

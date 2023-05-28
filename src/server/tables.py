@@ -67,7 +67,8 @@ class UserStudyPhaseEnum(enum.Enum):
 
     REGISTERED = 1
     STARTED = 2
-    COMPLETED = 3
+    COMPLETED_AWAITING_REVIEW = 3
+    ENDED = 4
 
 
 class UserStatus(db.Model):
@@ -184,3 +185,40 @@ class RLActionSelection(db.Model):
     )  # TODO: Describe the order here
     reward_component_vector = db.Column(ARRAY(db.Float), nullable=True)
     reward = db.Column(db.Float, nullable=True)
+    row_complete = db.Column(db.Boolean, nullable=False, default=False)
+
+    def __init__(
+        self,
+        user_id: int,
+        user_decision_idx: int,
+        morning_notification_time: int,
+        evening_notification_time: int,
+        day_in_study: int,
+        action: int,
+        policy_id: int,
+        policy_creation_time: datetime.datetime,
+        prior_ema_completion_time: datetime.datetime = None,
+        decision_timestamp: datetime.datetime = None,
+        action_selection_timestamp: datetime.datetime = None,
+        probability_of_selection: float = None,
+        state_vector: list = None,
+        reward_component_vector: list = None,
+        reward: float = None,
+        row_complete: bool = False,
+    ):
+        self.user_id = user_id
+        self.user_decision_idx = user_decision_idx
+        self.morning_notification_time = morning_notification_time
+        self.evening_notification_time = evening_notification_time
+        self.day_in_study = day_in_study
+        self.action = action
+        self.policy_id = policy_id
+        self.policy_creation_time = policy_creation_time
+        self.prior_ema_completion_time = prior_ema_completion_time
+        self.decision_timestamp = decision_timestamp
+        self.action_selection_timestamp = action_selection_timestamp
+        self.probability_of_selection = probability_of_selection
+        self.state_vector = state_vector
+        self.reward_component_vector = reward_component_vector
+        self.reward = reward
+        self.row_complete = row_complete

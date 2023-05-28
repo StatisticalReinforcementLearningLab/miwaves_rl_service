@@ -23,8 +23,6 @@ db = SQLAlchemy(app)
 migrate = Migrate()
 migrate.init_app(app, db)
 
-
-
 from src.server.auth.views import auth_blueprint
 app.register_blueprint(auth_blueprint)
 
