@@ -16,10 +16,9 @@ database_password = config['DATABASE']['POSTGRES_PASSWORD']
 secret_key = config['JWT']['SECRET_KEY']
 code_version = config['GIT']['COMMIT_ID']
 backend_host = config['BACKEND']['API_URI']
-backend_port = config['BACKEND']['API_PORT']
-ema_route = config['BACKEND']['EMA']
-action_route = config['BACKEND']['ACTION']
-last_day_index = config['STUDY']['LAST_DAY_INDEX']
+ema_route = config['BACKEND']['EMA_ENDPOINT']
+action_route = config['BACKEND']['ACTION_ENDPOINT']
+study_length = config['STUDY']['STUDY_LENGTH']
 engagement_backlog = config['STUDY']['ENGAGEMENT_DATA_WINDOW']
 cannabis_use_backlog = config['STUDY']['CANNABIS_USE_DATA_WINDOW']
 engagement_threshold = config['STUDY']['ENGAGEMENT_THRESHOLD']
@@ -27,7 +26,7 @@ cannabis_use_threshold = config['STUDY']['CANNABIS_USE_THRESHOLD']
 
 database_name = 'flask_jwt_auth'
 postgres_local_base = "postgresql://" + str(database_username) + ":" + str(database_password) + "@localhost/"
-backend_api = backend_host + ":" + backend_port + "/"
+backend_api = backend_host
 ema_api = backend_api + ema_route
 action_api = backend_api + action_route
 
@@ -42,7 +41,7 @@ class BaseConfig:
     BACKEND_API = backend_api
     EMA_API = ema_api
     ACTION_API = action_api
-    STUDY_LENGTH = int(last_day_index)
+    STUDY_LENGTH = int(study_length)
     ENGAGEMENT_DATA_WINDOW = int(engagement_backlog)
     CANNABIS_USE_DATA_WINDOW = int(cannabis_use_backlog)
     ENGAGEMENT_THRESHOLD = float(engagement_threshold)

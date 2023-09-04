@@ -38,14 +38,12 @@ def token_required(f):
             if current_client is None:
                 return {
                     "message": "Invalid Authentication token!",
-                    "data": None,
                     "status": "Unauthorized",
                 }, 401
         except Exception as e:
             print(e)
             return {
                 "message": "Something went wrong",
-                "data": None,
                 "status": "Internal Server Error",
             }, 500
 

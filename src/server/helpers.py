@@ -3,6 +3,8 @@
 import csv
 import datetime
 
+from flask import jsonify, make_response
+
 from src.server import db
 
 
@@ -32,3 +34,7 @@ def export_all_tables(backup_id: int, time: datetime.datetime = None):
     for tablename in db.Model._decl_class_registry.values():
         if hasattr(tablename, "__tablename__"):
             export_table(tablename, backup_id, time)
+
+def return_fail_response(message: str, code: int):
+    """Returns a response object with the given status, message, and code"""
+    return make_response(jsonify({"status": "fail", "message": message})), code

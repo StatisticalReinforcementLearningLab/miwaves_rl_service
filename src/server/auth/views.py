@@ -10,17 +10,16 @@ from src.server.auth.models import Client, BlacklistToken
 auth_blueprint = Blueprint('auth', __name__)
 
 
-class RegisterAPI(MethodView):
+class AuthRegisterAPI(MethodView):
     """
     Client Registration Resource
     """
 
     def post(self):
-        print("RegisterAPI")
         # get the post data
         post_data = request.get_json()
         # check if user already exists
-        user = Client.query.filter_by(username=post_data.get('username')).first()
+        user = Client.query.filter_by(username=post_data.get('api_user')).first()
         number_of_users = Client.query.count()
         if not user:
             # Do not want to allow more than one registered user
@@ -33,8 +32,8 @@ class RegisterAPI(MethodView):
             else:
                 try:
                     user = Client(
-                        username=post_data.get('username'),
-                        password=post_data.get('password')
+                        username=post_data.get('api_user'),
+                        password=post_data.get('api_pass')
                     )
                     # Print the user if DEBUG is set to True
                     if app.config.get('DEBUG'):
@@ -77,7 +76,7 @@ class RegisterAPI(MethodView):
             return make_response(jsonify(responseObject)), 202
 
 
-class LoginAPI(MethodView):
+class AuthLoginAPI(MethodView):
     """
     Client Login Resource
     """
@@ -87,10 +86,10 @@ class LoginAPI(MethodView):
         try:
             # fetch the user data
             user = Client.query.filter_by(
-                username=post_data.get('username')
+                username=post_data.get('api_user')
             ).first()
             if user and bcrypt.check_password_hash(
-                user.password, post_data.get('password')
+                user.password, post_data.get('api_pass')
             ):
                 auth_token = user.encode_auth_token(user.id)
                 if auth_token:
@@ -114,7 +113,7 @@ class LoginAPI(MethodView):
             }
             return make_response(jsonify(responseObject)), 500
 
-class LogoutAPI(MethodView):
+class AuthLogoutAPI(MethodView):
     """
     Logout Resource
     """
@@ -160,9 +159,9 @@ class LogoutAPI(MethodView):
             return make_response(jsonify(responseObject)), 403
 
 # define the API resources
-registration_view = RegisterAPI.as_view('register_api')
-login_view = LoginAPI.as_view('login_api')
-logout_view = LogoutAPI.as_view('logout_api')
+registration_view = AuthRegisterAPI.as_view('register_api')
+login_view = AuthLoginAPI.as_view('login_api')
+logout_view = AuthLogoutAPI.as_view('logout_api')
 
 # add Rules for API Endpoints
 auth_blueprint.add_url_rule(

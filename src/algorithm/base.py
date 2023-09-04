@@ -17,7 +17,7 @@ class RLAlgorithm(ABC):
         pass
 
     @abstractmethod
-    def update(self, state, action, reward, next_state):
+    def update(self, data):
         pass
     
     @staticmethod

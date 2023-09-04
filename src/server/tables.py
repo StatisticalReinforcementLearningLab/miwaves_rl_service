@@ -9,57 +9,46 @@ from src.server import app, db
 from sqlalchemy.dialects.postgresql import ARRAY
 
 
-
 class User(db.Model):
     """User Model for storing user related details"""
 
     __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    start_date = db.Column(db.DateTime, nullable=False)
-    end_date = db.Column(db.DateTime, nullable=False)
-    study_level_start_index = db.Column(db.Integer, nullable=True)
-    study_level_end_index = db.Column(db.Integer, nullable=True)
+    user_id = db.Column(db.String, primary_key=True, nullable=False)
+    # start_date = db.Column(db.DateTime, nullable=False)
+    # end_date = db.Column(db.DateTime, nullable=False)
+    consent_start_date = db.Column(db.DateTime, nullable=True)
+    consent_end_date = db.Column(db.DateTime, nullable=True)
+    rl_start_date = db.Column(db.DateTime, nullable=True)
+    rl_end_date = db.Column(db.DateTime, nullable=True)
+    # study_level_start_index = db.Column(db.Integer, nullable=True)
+    # study_level_end_index = db.Column(db.Integer, nullable=True)
     # TODO: Add columns for other baseline details of the user
 
     def __init__(
         self,
-        id: int,
-        start_date: datetime.date,
-        end_date: datetime.date,
-        study_level_start_index: int,
-        study_level_end_index: int,
+        user_id: str,
+        consent_start_date: datetime.date,
+        consent_end_date: datetime.date,
+        rl_start_date: datetime.date,
+        rl_end_date: datetime.date,
+        # study_level_start_index: int,
+        # study_level_end_index: int,
     ):
-        self.id = id
-        self.start_date = start_date
-        self.end_date = end_date
-        self.study_level_start_index = study_level_start_index
-        self.study_level_end_index = study_level_end_index
+        self.user_id = user_id
+        self.consent_start_date = consent_start_date
+        self.consent_end_date = consent_end_date
+        self.rl_start_date = rl_start_date
+        self.rl_end_date = rl_end_date
 
-    def update_study_level_start_index(self, study_level_start_index: int):
-        self.study_level_start_index = study_level_start_index
+        # self.study_level_start_index = study_level_start_index
+        # self.study_level_end_index = study_level_end_index
 
-    def update_study_level_end_index(self, study_level_end_index: int):
-        self.study_level_end_index = study_level_end_index
+    # def update_study_level_start_index(self, study_level_start_index: int):
+    #     self.study_level_start_index = study_level_start_index
 
-    # @staticmethod
-    # def decode_auth_token(auth_token):
-    #     """
-    #     Validates the auth token
-    #     :param auth_token:
-    #     :return: integer|string
-    #     """
-    #     try:
-    #         payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'))
-    #         is_blacklisted_token = BlacklistToken.check_blacklist(auth_token)
-    #         if is_blacklisted_token:
-    #             return 'Token blacklisted. Please log in again.'
-    #         else:
-    #             return payload['sub']
-    #     except jwt.ExpiredSignatureError:
-    #         return 'Signature expired. Please log in again.'
-    #     except jwt.InvalidTokenError:
-    #         return 'Invalid token. Please log in again.'
+    # def update_study_level_end_index(self, study_level_end_index: int):
+    #     self.study_level_end_index = study_level_end_index
 
 
 class UserStudyPhaseEnum(enum.Enum):
@@ -76,27 +65,33 @@ class UserStatus(db.Model):
 
     __tablename__ = "user_status"
 
-    id = db.Column(
-        db.Integer, db.ForeignKey("users.id"), primary_key=True, nullable=False
+    user_id = db.Column(
+        db.String, db.ForeignKey("users.user_id"), primary_key=True, nullable=False
     )
     study_phase = db.Column(db.Enum(UserStudyPhaseEnum), nullable=False)
-    study_day = db.Column(db.Integer, nullable=False)
     morning_notification_time_start = db.Column(db.Integer, nullable=True)
     evening_notification_time_start = db.Column(db.Integer, nullable=True)
+    current_decision_index = db.Column(db.Integer, nullable=False, default=0)
+    current_time_of_day = db.Column(db.Integer, nullable=False, default=0)
+    study_day = db.Column(db.Integer, nullable=False, default=0)
 
     def __init__(
         self,
-        id: int,
+        user_id: str,
         study_phase: UserStudyPhaseEnum,
-        study_day: int,
         morning_notification_time_start: int,
         evening_notification_time_start: int,
+        current_decision_index: int = 0,
+        current_time_of_day: int = 1,
+        study_day: int = 0,
     ):
-        self.id = id
+        self.user_id = user_id
         self.study_phase = study_phase
-        self.study_day = study_day
         self.morning_notification_time_start = morning_notification_time_start
         self.evening_notification_time_start = evening_notification_time_start
+        self.current_decision_index = current_decision_index
+        self.current_time_of_day = current_time_of_day
+        self.study_day = study_day
 
 
 class AlgorithmStatus(db.Model):
@@ -105,7 +100,7 @@ class AlgorithmStatus(db.Model):
     __tablename__ = "algorithm_status"
 
     policy_id = db.Column(db.Integer, primary_key=True, nullable=False)
-    update_time = db.Column(db.DateTime, nullable=False)
+    update_time = db.Column(db.DateTime(timezone=True), nullable=False)
     update_day_in_study = db.Column(db.Integer, nullable=False)
     current_decision_time = db.Column(db.Integer, nullable=False)
     current_day_in_study = db.Column(db.Integer, nullable=False)
@@ -126,19 +121,22 @@ class AlgorithmStatus(db.Model):
 
 
 class RLWeights(db.Model):
-    """Table to store the RL weights"""
+    """Table to store the RL weights. Also stores a link
+    to the pickle file which contains the data used to update
+    to this algorithm"""
 
     __tablename__ = "rl_weights"
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     update_timestamp = db.Column(db.DateTime, nullable=False)
-    posterior_mean_array = db.Column(ARRAY(db.Float), nullable=False)
-    posterior_var_array = db.Column(ARRAY(db.Float), nullable=False)
-    noise_var = db.Column(db.Float, nullable=False)
-    random_eff_cov_array = db.Column(ARRAY(db.Float), nullable=False)
+    posterior_mean_array = db.Column(ARRAY(db.Float), nullable=True)
+    posterior_var_array = db.Column(ARRAY(db.Float), nullable=True)
+    noise_var = db.Column(db.Float, nullable=True)
+    random_eff_cov_array = db.Column(ARRAY(db.Float), nullable=True)
     code_commit_id = db.Column(
         db.String, nullable=False, default=app.config.get("CODE_VERSION")
     )
+    data_pickle_file_path = db.Column(db.String, nullable=False)
 
     def __init__(
         self,
@@ -148,6 +146,7 @@ class RLWeights(db.Model):
         noise_var: float,
         random_eff_cov_array: list,
         code_commit_id: str = app.config.get("CODE_VERSION"),
+        data_pickle_file_path: str = None,
     ):
         self.update_timestamp = update_timestamp
         self.posterior_mean_array = posterior_mean_array
@@ -155,6 +154,7 @@ class RLWeights(db.Model):
         self.noise_var = noise_var
         self.random_eff_cov_array = random_eff_cov_array
         self.code_commit_id = code_commit_id
+        self.data_pickle_file_path = data_pickle_file_path
 
 
 class RLActionSelection(db.Model):
@@ -164,45 +164,51 @@ class RLActionSelection(db.Model):
     reward for that user decision time (imputed afterwards)
     """
 
+    __tablename__ = "rl_action_selection"
+
     user_id = db.Column(
-        db.Integer, db.ForeignKey("users.id"), primary_key=True, nullable=False
+        db.String, db.ForeignKey("users.user_id"), primary_key=True, nullable=False
     )
     user_decision_idx = db.Column(db.Integer, primary_key=True, nullable=False)
     morning_notification_time = db.Column(db.Integer, nullable=False)
     evening_notification_time = db.Column(db.Integer, nullable=False)
     day_in_study = db.Column(db.Integer, nullable=False)
     action = db.Column(db.Integer, nullable=False)
-    policy_id = db.Column(
-        db.Integer, db.ForeignKey("algorithm_status.policy_id"), nullable=False
-    )
-    policy_creation_time = db.Column(db.DateTime, nullable=False)
-    prior_ema_completion_time = db.Column(db.DateTime, nullable=True)
-    decision_timestamp = db.Column(db.DateTime, nullable=True)
+    policy_id = db.Column(db.Integer, nullable=False)
+    seed = db.Column(db.Integer, nullable=False)
+    # policy_creation_time = db.Column(db.DateTime, nullable=False)
+    prior_ema_completion_time = db.Column(db.String, nullable=True)
     action_selection_timestamp = db.Column(db.DateTime, nullable=True)
-    probability_of_selection = db.Column(db.Float, nullable=True)
+    push_notification_timestamp = db.Column(db.String, nullable=True)
+    message_click_notification_timestamp = db.Column(db.String, nullable=True)
+    act_prob = db.Column(db.Float, nullable=True)
+    cannabis_use = db.Column(ARRAY(db.Float), nullable=True)
     state_vector = db.Column(
         ARRAY(db.Float), nullable=True
     )  # TODO: Describe the order here
-    reward_component_vector = db.Column(ARRAY(db.Float), nullable=True)
+    # reward_component_vector = db.Column(ARRAY(db.Float), nullable=True)
     reward = db.Column(db.Float, nullable=True)
-    row_complete = db.Column(db.Boolean, nullable=False, default=False)
+    row_complete = db.Column(db.Boolean, nullable=False)
 
     def __init__(
         self,
-        user_id: int,
+        user_id: str,
         user_decision_idx: int,
         morning_notification_time: int,
         evening_notification_time: int,
         day_in_study: int,
         action: int,
         policy_id: int,
-        policy_creation_time: datetime.datetime,
-        prior_ema_completion_time: datetime.datetime = None,
-        decision_timestamp: datetime.datetime = None,
+        seed: int,
+        # policy_creation_time: datetime.datetime,
+        prior_ema_completion_time: str = None,
+        push_notification_timestamp: str = None,
         action_selection_timestamp: datetime.datetime = None,
-        probability_of_selection: float = None,
+        message_click_notification_timestamp: str = None,
+        act_prob: float = None,
+        cannabis_use: list = None,
         state_vector: list = None,
-        reward_component_vector: list = None,
+        # reward_component_vector: list = None,
         reward: float = None,
         row_complete: bool = False,
     ):
@@ -213,12 +219,69 @@ class RLActionSelection(db.Model):
         self.day_in_study = day_in_study
         self.action = action
         self.policy_id = policy_id
-        self.policy_creation_time = policy_creation_time
+        self.seed = seed
+        # self.policy_creation_time = policy_creation_time
         self.prior_ema_completion_time = prior_ema_completion_time
-        self.decision_timestamp = decision_timestamp
         self.action_selection_timestamp = action_selection_timestamp
-        self.probability_of_selection = probability_of_selection
+        self.push_notification_timestamp = push_notification_timestamp
+        self.message_click_notification_timestamp = message_click_notification_timestamp
+        self.act_prob = act_prob
+        self.cannabis_use = cannabis_use
         self.state_vector = state_vector
-        self.reward_component_vector = reward_component_vector
+        # self.reward_component_vector = reward_component_vector
         self.reward = reward
         self.row_complete = row_complete
+
+
+class UserActionHistory(db.Model):
+    """
+    Stores all the action calls made to the server for any given user
+    along with the raw data that was sent
+    """
+
+    __tablename__ = "user_action_history"
+
+    index = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    user_id = db.Column(db.String, db.ForeignKey("users.user_id"), nullable=False)
+    decision_idx = db.Column(db.Integer, nullable=False)
+    finished_ema = db.Column(db.Boolean, nullable=False)
+    activity_question_response = db.Column(db.String, nullable=True)
+    app_use_flag = db.Column(db.Boolean, nullable=False)
+    cannabis_use = db.Column(ARRAY(db.Integer), nullable=True)
+    reward = db.Column(db.Float, nullable=False)
+    state = db.Column(ARRAY(db.Integer), nullable=False)
+    action = db.Column(db.Integer, nullable=False)
+    seed = db.Column(db.Integer, nullable=False)
+    act_prob = db.Column(db.Float, nullable=False)
+    policy_id = db.Column(db.Integer, nullable=False)
+    timestamp = db.Column(db.DateTime(timezone=True), nullable=False)
+
+    def __init__(
+        self,
+        user_id: str,
+        decision_idx: int,
+        finished_ema: bool,
+        activity_question_response: bool,
+        app_use_flag: bool,
+        cannabis_use: list,
+        reward: float,
+        state: list,
+        action: int,
+        seed: int,
+        act_prob: float,
+        policy_id: int,
+        timestamp: datetime.datetime = datetime.datetime.now().astimezone().isoformat(),
+    ):
+        self.user_id = user_id
+        self.decision_idx = decision_idx
+        self.finished_ema = finished_ema
+        self.activity_question_response = activity_question_response
+        self.app_use_flag = app_use_flag
+        self.cannabis_use = cannabis_use
+        self.reward = reward
+        self.state = state
+        self.action = action
+        self.seed = seed
+        self.act_prob = act_prob
+        self.policy_id = policy_id
+        self.timestamp = timestamp

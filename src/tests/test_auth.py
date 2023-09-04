@@ -14,8 +14,8 @@ def register_user(self, username, password):
     return self.client.post(
         '/auth/register',
         data=json.dumps(dict(
-            username=username,
-            password=password
+            api_user=username,
+            api_pass=password
         )),
         content_type='application/json',
     )
@@ -24,8 +24,8 @@ def login_user(self, username, password):
     return self.client.post(
         '/auth/login',
         data=json.dumps(dict(
-            username=username,
-            password=password
+            api_user=username,
+            api_pass=password
         )),
         content_type='application/json',
     )
@@ -108,7 +108,7 @@ class TestAuthBlueprint(BaseTestCase):
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'success')
             self.assertTrue(data['data'] is not None)
-            self.assertTrue(data['data']['username'] == 'joe@gmail.com')
+            self.assertTrue(data['data']['api_user'] == 'joe@gmail.com')
             self.assertTrue(data['data']['admin'] is 'true' or 'false')
             self.assertEqual(response.status_code, 200)
 
