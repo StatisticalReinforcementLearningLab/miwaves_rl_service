@@ -24,16 +24,18 @@ def export_table(tablename: db.Model, backup_id: int, time: datetime.datetime = 
         for row in tablename.query.all():
             writer.writerow([getattr(row, c.name) for c in tablename.__table__.columns])
 
+
 def export_all_tables(backup_id: int, time: datetime.datetime = None):
     """Exports all tables to csv files, in a folder inside data/backups/"""
     # If time is None, use current time
     if time is None:
         time = datetime.datetime.now()
-    
+
     # Loop over all tables and export them
     for tablename in db.Model._decl_class_registry.values():
         if hasattr(tablename, "__tablename__"):
             export_table(tablename, backup_id, time)
+
 
 def return_fail_response(message: str, code: int):
     """Returns a response object with the given status, message, and code"""

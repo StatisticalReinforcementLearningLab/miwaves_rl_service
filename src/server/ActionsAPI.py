@@ -291,7 +291,7 @@ class ActionsAPI(MethodView):
                         "act_prob": act_prob,
                         "policy_id": policy_id,
                         "decision_index": decision_idx,
-                        "act_gen_timestamp": new_useraction.timestamp
+                        "act_gen_timestamp": new_useraction.timestamp,
                     }
 
                     return make_response(jsonify(responseObject)), 200

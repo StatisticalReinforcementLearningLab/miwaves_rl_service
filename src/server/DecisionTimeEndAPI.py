@@ -1,7 +1,13 @@
 import datetime
 from src.server.ActionsAPI import ActionsAPI
 from src.server import app, db
-from src.server.tables import RLActionSelection, User, UserActionHistory, UserStatus, UserStudyPhaseEnum
+from src.server.tables import (
+    RLActionSelection,
+    User,
+    UserActionHistory,
+    UserStatus,
+    UserStudyPhaseEnum,
+)
 from src.server.auth.auth import token_required
 from src.server.helpers import return_fail_response
 

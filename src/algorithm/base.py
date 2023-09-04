@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 # Create RL algorithm abstract class
 class RLAlgorithm(ABC):
-    ''' Abstract class for RL algorithm '''
+    """Abstract class for RL algorithm"""
 
     @abstractmethod
     def __init__(self, nusers):
@@ -19,7 +19,7 @@ class RLAlgorithm(ABC):
     @abstractmethod
     def update(self, data):
         pass
-    
+
     @staticmethod
     @abstractmethod
     def make_state(params):

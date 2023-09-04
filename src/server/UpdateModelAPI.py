@@ -14,6 +14,7 @@ from flask.views import MethodView
 import traceback
 import csv
 
+
 class UpdateModelAPI(MethodView):
     """
     Update model weights of the RL algorithm
@@ -35,7 +36,9 @@ class UpdateModelAPI(MethodView):
             writer = csv.writer(csvfile)
             writer.writerow([c.name for c in tablename.__table__.columns])
             for row in tablename.query.all():
-                writer.writerow([getattr(row, c.name) for c in tablename.__table__.columns])
+                writer.writerow(
+                    [getattr(row, c.name) for c in tablename.__table__.columns]
+                )
 
     def backup_all_tables(self, time: datetime.datetime) -> tuple[bool, str, str]:
         """
@@ -44,7 +47,7 @@ class UpdateModelAPI(MethodView):
         :return: error message if unsuccessful, None otherwise
         :return: location of the backup
         """
-        
+
         try:
             # Loop over all tables and export them
             for tablename in db.Model.registry._class_registry.values():
@@ -52,7 +55,7 @@ class UpdateModelAPI(MethodView):
                     self.export_table(tablename, time)
         except Exception as e:
             # TODO: put this in logger
-            if app.config.get('DEBUG'):
+            if app.config.get("DEBUG"):
                 print("Error backing up tables: ", e)
 
             return False, "Error backing up tables: " + str(e), None
@@ -61,7 +64,6 @@ class UpdateModelAPI(MethodView):
 
     @token_required
     def post(self):
-        
         try:
             timenow = datetime.datetime.now()
 
@@ -75,12 +77,14 @@ class UpdateModelAPI(MethodView):
             if not status:
                 # TODO: put this in logger
                 return return_fail_response(message, 500)
-            
+
             # Get all the data from the RLActionSelection table
             rl_action_selection = db.session.query(RLActionSelection)
 
             # Convert to pandas dataframe
-            data = pd.read_sql(str(rl_action_selection.statement), db.engine.connect().connection)
+            data = pd.read_sql(
+                str(rl_action_selection.statement), db.engine.connect().connection
+            )
 
             algorithm = app.config.get("ALGORITHM")
 
@@ -90,7 +94,7 @@ class UpdateModelAPI(MethodView):
             if not status:
                 # TODO: put this in logger
                 return return_fail_response(message, 500)
-            
+
             # Create a RLWeights object
             rl_weights = RLWeights(
                 update_timestamp=timenow,
@@ -110,7 +114,9 @@ class UpdateModelAPI(MethodView):
                     print(e)
                     traceback.print_exc()
                 db.session.rollback()
-                return return_fail_response("Some error occurred. Please try again.", 500)
+                return return_fail_response(
+                    "Some error occurred. Please try again.", 500
+                )
             else:
                 # TODO: put this in logger
                 print("DB Committed new rl_weights")
@@ -122,7 +128,7 @@ class UpdateModelAPI(MethodView):
                 }
 
                 return make_response(jsonify(responseObject)), 201
-        
+
         except Exception as e:
             if app.config.get("DEBUG"):
                 print(e)
