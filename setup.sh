@@ -23,6 +23,8 @@ CREATE DATABASE flask_jwt_auth_test TABLESPACE miwaves_db;
 # Later connect to see using psql -U <username> -d <database_name>
 # and then view tables using \dt, and describe table using \d+ <table_name>
 
+# Exit postgresql using \q
+
 # On windows, set flask app name as - $env:FLASK_APP="src.server"
 # Otherwise do - export FLASK_APP=src.server
 

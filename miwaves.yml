@@ -1,0 +1,14 @@
+name: miwaves
+channels:
+  - defaults
+dependencies:
+  - python=3.9.16
+  - nomkl
+  - sympy
+  - scikit-learn
+  - pandas
+  - numpy
+  - scipy
+  - ipykernel
+  - jaxlib
+  - jax
