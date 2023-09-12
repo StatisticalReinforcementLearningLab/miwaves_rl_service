@@ -39,6 +39,6 @@
 If commands have added users to the database, and you want to reset the database completely (erase it and start afresh), use the following set of commands in order:\
 ```python manage.py drop_db``` # To drop the entire database USE WITH CAUTION\
 ```python manage.py db stamp head``` # To reset the database after drop_db\
-```python manage.py create_db```\ # To create the database again\
+```python manage.py create_db``` # To create the database again\
 ```python manage.py db migrate``` # To migrate the database after drop_db\
 ```python manage.py db upgrade``` # To upgrade the database after drop_db
