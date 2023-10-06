@@ -6,7 +6,7 @@ from src.server.ActionsAPI import ActionsAPI
 from src.server.DecisionTimeEndAPI import DecisionTimeEndAPI
 from src.server.RegisterAPI import RegisterAPI
 from src.server.UpdateModelAPI import UpdateModelAPI
-from src.server.UpdateNotificationTimeAPI import UpdateNotificationTimeAPI
+# from src.server.UpdateNotificationTimeAPI import UpdateNotificationTimeAPI
 
 
 from flask import Blueprint
