@@ -6,9 +6,9 @@
 
 # Setup
 - Install [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
+- Install postgres. Download latest postgres from this [link](https://www.postgresql.org/download/)
 - Set up conda environment using: ```conda env create -f miwaves.yml```
 - Make sure to activate the conda environment using ```conda activate miwaves```
-- Install postgres. Download latest postgres from this [link](https://www.postgresql.org/download/)
 - Clone this repository
 - Navigate to the repo folder: ```cd miwaves_rl_service```
 - Specify the postgres username and password in ```config.ini```. Also configure the backend API_URI there (it currently does not support authentication with token or user/pass, but that will be added once the backend api has been developed). The default backend URI is specified to be of a mock Postman API.
