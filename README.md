@@ -7,7 +7,7 @@
 # Setup
 - Install [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
 - Install postgres. Download latest postgres from this [link](https://www.postgresql.org/download/)
-- Set up conda environment using: ```conda env create -f miwaves.yml```
+- Set up conda environment using: ```conda env create -f miwaves.yml``` (If you are on Debian, make sure you have ``gcc`` installed, and ``libpq-dev`` installed)
 - Make sure to activate the conda environment using ```conda activate miwaves```
 - Clone this repository
 - Navigate to the repo folder: ```cd miwaves_rl_service```
