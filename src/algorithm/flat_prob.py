@@ -9,7 +9,7 @@ from src.algorithm.base import RLAlgorithm
 class FlatProbabilityAlgorithm(RLAlgorithm):
     """Flat probability algorithm"""
 
-    def __init__(self, nusers: int = 10, prob: float = 0.5) -> None:
+    def __init__(self, prob: float = 0.5) -> None:
         """
         Initialize flat probability algorithm
         :param nusers: number of users
@@ -20,7 +20,7 @@ class FlatProbabilityAlgorithm(RLAlgorithm):
         self.maxseed = 2**16 - 1
 
     def get_action(
-        self, user_id: int, state: np.ndarray, decision_time: int, seed: int = -1
+        self, user_id: str, state: np.ndarray, decision_time: int, seed: int = -1
     ) -> tuple[int, int, float, int]:
         """
         Get action

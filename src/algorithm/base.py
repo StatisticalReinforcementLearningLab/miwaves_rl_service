@@ -9,7 +9,7 @@ class RLAlgorithm(ABC):
     """Abstract class for RL algorithm"""
 
     @abstractmethod
-    def __init__(self, nusers):
+    def __init__(self):
         pass
 
     @abstractmethod

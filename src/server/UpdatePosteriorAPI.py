@@ -15,12 +15,12 @@ import traceback
 import csv
 
 
-class UpdateModelAPI(MethodView):
+class UpdatePosteriorAPI(MethodView):
     """
     Update model weights of the RL algorithm
     """
 
-    def export_table(self, tablename, time):
+    def export_table(self, tablename, time) -> None:
         """Exports the table to a csv file, in a folder inside data/backups/"""
 
         # Create filename
@@ -40,12 +40,13 @@ class UpdateModelAPI(MethodView):
                     [getattr(row, c.name) for c in tablename.__table__.columns]
                 )
 
-    def backup_all_tables(self, time: datetime.datetime) -> tuple[bool, str, str]:
+    def backup_all_tables(self, time: datetime.datetime) -> tuple[bool, str, str, int]:
         """
         Exports all tables to csv files, in a folder
         :return: True if successful, False otherwise
         :return: error message if unsuccessful, None otherwise
         :return: location of the backup
+        :return: error code if unsuccessful, None otherwise
         """
 
         try:
@@ -58,9 +59,9 @@ class UpdateModelAPI(MethodView):
             if app.config.get("DEBUG"):
                 print("Error backing up tables: ", e)
 
-            return False, "Error backing up tables: " + str(e), None
+            return False, "Error backing up tables: " + str(e), None, 400
 
-        return True, None, f"./data/backups/{time}"
+        return True, None, f"./data/backups/{time}", None
 
     @token_required
     def post(self):
@@ -72,11 +73,11 @@ class UpdateModelAPI(MethodView):
             print("Update model request received at: ", timenow)
 
             # First backup all the tables
-            status, message, location = self.backup_all_tables(timenow)
+            status, message, location, ec = self.backup_all_tables(timenow)
 
             if not status:
                 # TODO: put this in logger
-                return return_fail_response(message, 500)
+                return return_fail_response(message, 500, ec)
 
             # Get all the data from the RLActionSelection table
             rl_action_selection = db.session.query(RLActionSelection)
@@ -86,20 +87,35 @@ class UpdateModelAPI(MethodView):
                 str(rl_action_selection.statement), db.engine.connect().connection
             )
 
+            # Get the algorithm
             algorithm = app.config.get("ALGORITHM")
 
             # Send the data to the rl algorithm update
-            status, message, policyid, params = algorithm.update(data)
+            status, message, policyid, params, ec = algorithm.update(data,
+                                                                     update_posterior=True,
+                                                                     update_hyperparam=False,
+                                                                     use_data=False)
 
             if not status:
                 # TODO: put this in logger
-                return return_fail_response(message, 500)
+                return return_fail_response(message, 500, ec)
+            
+            if app.config.get("DEBUG"):
+                app.logger.info("Updated posterior")
+                app.logger.info("policyid: " + str(policyid))
+                app.logger.info("params: " + str(params))
 
             # Create a RLWeights object
             rl_weights = RLWeights(
                 update_timestamp=timenow,
                 posterior_mean_array=params.get("posterior_mean_array"),
                 posterior_var_array=params.get("posterior_var_array"),
+                posterior_theta_pop_mean_array=params.get(
+                    "posterior_theta_pop_mean_array"
+                ),
+                posterior_theta_pop_var_array=params.get(
+                    "posterior_theta_pop_var_array"
+                ),
                 noise_var=params.get("noise_var"),
                 random_eff_cov_array=params.get("random_eff_cov_array"),
                 data_pickle_file_path=location,
@@ -115,7 +131,7 @@ class UpdateModelAPI(MethodView):
                     traceback.print_exc()
                 db.session.rollback()
                 return return_fail_response(
-                    "Some error occurred. Please try again.", 500
+                    "Some error occurred. Please try again.", 500, 401
                 )
             else:
                 # TODO: put this in logger
@@ -123,7 +139,7 @@ class UpdateModelAPI(MethodView):
 
                 responseObject = {
                     "status": "success",
-                    "message": "Successfully updated model.",
+                    "message": "Successfully updated parameters/posteriors.",
                     "policyid": policyid,
                 }
 
@@ -133,4 +149,4 @@ class UpdateModelAPI(MethodView):
             if app.config.get("DEBUG"):
                 print(e)
                 traceback.print_exc()
-            return return_fail_response("Some error occurred. Please try again.", 500)
+            return return_fail_response("Some error occurred. Please try again.", 500, 402)

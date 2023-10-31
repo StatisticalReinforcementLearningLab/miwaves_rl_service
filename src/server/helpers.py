@@ -37,6 +37,17 @@ def export_all_tables(backup_id: int, time: datetime.datetime = None):
             export_table(tablename, backup_id, time)
 
 
-def return_fail_response(message: str, code: int):
+def return_fail_response(message: str, code: int, error_code: int = None):
     """Returns a response object with the given status, message, and code"""
-    return make_response(jsonify({"status": "fail", "message": message})), code
+    if error_code is not None:
+        return make_response(
+            jsonify(
+                {
+                    "status": "fail",
+                    "message": message,
+                    "error_code": error_code,
+                }
+            )
+        ), code
+    else:
+        return make_response(jsonify({"status": "fail", "message": message})), code

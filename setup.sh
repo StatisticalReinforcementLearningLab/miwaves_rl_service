@@ -25,6 +25,8 @@ CREATE DATABASE flask_jwt_auth_test TABLESPACE miwaves_db;
 
 # Exit postgresql using \q
 
+# Configure config.ini file with the postgres username and password details
+
 # On windows, set flask app name as - $env:FLASK_APP="src.server"
 # Otherwise do - export FLASK_APP=src.server
 

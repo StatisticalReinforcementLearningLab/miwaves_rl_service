@@ -1,3 +1,4 @@
+import traceback
 from src.server import app, db
 from src.server.auth.auth import token_required
 from src.server.tables import (
@@ -22,27 +23,30 @@ class ActionsAPI(MethodView):
     """
 
     @staticmethod
-    def check_all_fields_present(post_data: dict) -> tuple[bool, str]:
+    def check_all_fields_present(post_data: dict) -> tuple[bool, str, int]:
         """
         Check if all fields are present in the post data
         :param post_data: The post data from the request
         """
 
         if not post_data.get("user_id"):
-            return False, "Please provide a valid user id."
+            return False, "Please provide a valid user id.", 200
         if post_data.get("finished_ema") is None or not isinstance(
             post_data.get("finished_ema"), bool
         ):
-            return False, "Please provide a valid finished ema."
+            return False, "Please provide a valid finished ema.", 201
         if post_data.get("app_use_flag") is None or not isinstance(
             post_data.get("app_use_flag"), bool
         ):
-            return False, "Please provide a valid app use flag."
+            print(type(post_data.get("app_use_flag")))
+            print(post_data.get("app_use_flag"))
+            return False, "Please provide a valid app use flag.", 202
         # if not post_data.get("activity_question_response"):
         #     return False, "Please provide a valid activity question response."
         # if not post_data.get("cannabis_use"):
         #     return False, "Please provide a valid cannabis use."
-        return True, None
+        return True, None, None
+
 
     @staticmethod
     def get_raw_reward_data(post_data: dict) -> dict:
@@ -104,10 +108,10 @@ class ActionsAPI(MethodView):
         )
 
         # convert engagement data to numpy array
-        engagement_data = np.array(engagement_data)
+        engagement_data = np.array(engagement_data).flatten()
 
         # convert cannabis use data to numpy array
-        cannabis_use_data = np.array(cannabis_use_data)
+        cannabis_use_data = np.array(cannabis_use_data).flatten()
 
         # TODO: Check for None values in the data and replace them with empty arrays
         # Return the engagement and cannabis use data
@@ -158,11 +162,15 @@ class ActionsAPI(MethodView):
         """
         Get actions for the specified user
         """
+        app.logger.info("Actions API called")
+
         # get the post data
         post_data = request.get_json()
 
         # get the user id
         user_id = post_data.get("user_id")
+
+        app.logger.info(f"Requested actions for user {user_id}")
 
         # check if user exists
         user = User.query.filter_by(user_id=user_id).first()
@@ -170,24 +178,23 @@ class ActionsAPI(MethodView):
         try:
             # if user does not exist, return fail
             if not user:
+                app.logger.error(f"User {user_id} does not exist.")
                 return return_fail_response(
                     message=f"User {user_id} does not exist.",
                     code=202,
+                    error_code=203
                 )
-                # responseObject = {
-                #     "status": "fail",
-                #     "message": f"User {user_id} does not exist.",
-                # }
-                # return make_response(jsonify(responseObject)), 202
             else:
                 try:
                     # Check all fields are present
-                    status, message = self.check_all_fields_present(post_data)
+                    status, message, ec = self.check_all_fields_present(post_data)
 
                     if not status:
+                        app.logger.error(message)
                         return return_fail_response(
                             message=message,
                             code=202,
+                            error_code=ec
                         )
 
                     # Check the user_status
@@ -219,10 +226,14 @@ class ActionsAPI(MethodView):
                     except Exception as e:
                         if app.config.get("DEBUG"):
                             print(e)
+                        app.logger.critical("Failed to compute reward")
                         return return_fail_response(
                             message="Failed to compute reward",
                             code=202,
+                            error_code=204
                         )
+                    else:
+                        app.logger.info(f"Reward for user {user_id} is {reward}")
 
                     raw_state_data = self.get_raw_state_data(
                         post_data, user_id, decision_idx, time_of_day, reward
@@ -234,10 +245,15 @@ class ActionsAPI(MethodView):
                     except Exception as e:
                         if app.config.get("DEBUG"):
                             print(e)
+                        app.logger.critical("Failed to compute state")
+                        app.logger.critical(traceback.format_exc())
                         return return_fail_response(
                             message="Failed to compute state",
                             code=202,
+                            error_code=205
                         )
+                    else:
+                        app.logger.info(f"State for user {user_id} is {state}")
 
                     # Get the action
                     try:
@@ -266,17 +282,25 @@ class ActionsAPI(MethodView):
                         db.session.rollback()
                         if app.config.get("DEBUG"):
                             print(e)
+                        app.logger.critical("Failed to compute action")
+                        app.logger.critical(traceback.format_exc())
                         return return_fail_response(
                             message="Failed to compute action",
                             code=202,
+                            error_code=206
                         )
+                    else:
+                        app.logger.info(f"Action for user {user_id} at {decision_idx} is {action}")
 
                 except Exception as e:
                     if app.config.get("DEBUG"):
                         print(e)
+                    app.logger.error("Some error occurred while getting actions")
+                    app.logger.error(traceback.format_exc())
                     return return_fail_response(
                         message="Some error occurred. Please try again.",
                         code=401,
+                        error_code=207
                     )
 
                 else:
@@ -298,7 +322,10 @@ class ActionsAPI(MethodView):
 
         except Exception as e:
             print(e)
+            app.logger.error("Some error occurred while getting actions")
+            app.logger.error(traceback.format_exc())
             return return_fail_response(
                 message="Some error occurred. Please try again.",
                 code=401,
+                error_code=208
             )

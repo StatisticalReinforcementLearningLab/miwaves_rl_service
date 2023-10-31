@@ -1,34 +1,35 @@
-from src.server import db
+from src.server import app, db
 from src.server.auth.auth import token_required
 from src.server.tables import User, UserStatus, UserStudyPhaseEnum
 
 
 from flask import jsonify, make_response, request
 from flask.views import MethodView
+from src.server.helpers import return_fail_response
 
 import traceback
 
 
-def check_all_fields_present(post_data):
+def check_all_fields_present(post_data) -> tuple[bool, str, int]:
     """
     Check if all fields are present in the post data
     """
 
-    if not post_data.get("user_id"):
-        return False, "Please provide a valid user id."
+    if not post_data.get("user_id") and not isinstance(post_data.get("user_id"), str):
+        return False, "Please provide a valid user id.", 100
     if not post_data.get("rl_start_date"):
-        return False, "Please provide a valid rl start date."
+        return False, "Please provide a valid rl start date.", 101
     if not post_data.get("rl_end_date"):
-        return False, "Please provide a valid rl end date."
+        return False, "Please provide a valid rl end date.", 102
     if not post_data.get("consent_start_date"):
-        return False, "Please provide a valid consent start date."
+        return False, "Please provide a valid consent start date.", 103
     if not post_data.get("consent_end_date"):
-        return False, "Please provide a valid consent end date."
+        return False, "Please provide a valid consent end date.", 104
     if not post_data.get("morning_notification_time_start"):
-        return False, "Please provide a valid morning notification time."
+        return False, "Please provide a valid morning notification time.", 105
     if not post_data.get("evening_notification_time_start"):
-        return False, "Please provide a valid evening notification time."
-    return True, None
+        return False, "Please provide a valid evening notification time.", 106
+    return True, None, None
 
 
 class RegisterAPI(MethodView):
@@ -38,8 +39,13 @@ class RegisterAPI(MethodView):
 
     @token_required
     def post(self):
+
+        app.logger.info("RegisterAPI called")
+
         # get the post data
         post_data = request.get_json()
+
+        app.logger.info(f"post_data: {post_data}")
 
         # check if user already exists
         user = User.query.filter_by(user_id=post_data.get("user_id")).first()
@@ -48,13 +54,9 @@ class RegisterAPI(MethodView):
         try:
             if not user:
                 # Check all fields are present
-                status, message = check_all_fields_present(post_data)
+                status, message, ec = check_all_fields_present(post_data)
                 if not status:
-                    responseObject = {
-                        "status": "fail",
-                        "message": message,
-                    }
-                    return make_response(jsonify(responseObject)), 202
+                    return return_fail_response(message, 202, ec)
 
                 user = User(
                     user_id=str(post_data.get("user_id")),
@@ -90,11 +92,9 @@ class RegisterAPI(MethodView):
                     db.session.rollback()
                     print(e)  # TODO: Set it to logger
                     traceback.print_exc()
-                    responseObject = {
-                        "status": "fail",
-                        "message": "Some error occurred while adding user info to internal database. Please try again.",
-                    }
-                    return make_response(jsonify(responseObject)), 401
+                    error_message = "Some error occurred while adding user info to internal database. Please try again."
+                    ec = 107
+                    return return_fail_response(error_message, 401, ec)
                 else:
                     db.session.commit()
                     responseObject = {
@@ -103,16 +103,13 @@ class RegisterAPI(MethodView):
                     }
                     return make_response(jsonify(responseObject)), 200
             else:
-                responseObject = {
-                    "status": "fail",
-                    "message": f"User {post_data.get('user_id')} already exists.",
-                }
-                return make_response(jsonify(responseObject)), 202
+                message = f"User {post_data.get('user_id')} already exists."
+                ec = 108
+                return return_fail_response(message, 202, ec)
+            
         except Exception as e:
             print(e)  # TODO: Set it to logger
             db.session.rollback()
-            responseObject = {
-                "status": "fail",
-                "message": "Some error occurred. Please try again.",
-            }
-            return make_response(jsonify(responseObject)), 401
+            message = "Some error occurred while adding user info to internal database. Please try again."
+            ec = 109
+            return return_fail_response(message, 401, ec)

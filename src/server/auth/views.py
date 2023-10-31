@@ -27,6 +27,7 @@ class AuthRegisterAPI(MethodView):
                 responseObject = {
                     'status': 'fail',
                     'message': 'No more users allowed to register.',
+                    'error_code': 4,
                 }
                 return make_response(jsonify(responseObject)), 202
             else:
@@ -65,13 +66,15 @@ class AuthRegisterAPI(MethodView):
                     # import pdb; pdb.set_trace()
                     responseObject = {
                         'status': 'fail',
-                        'message': 'Some error occurred. Please try again.'
+                        'message': 'Some error occurred. Please try again.',
+                        'error_code': 5
                     }
                     return make_response(jsonify(responseObject)), 401
         else:
             responseObject = {
                 'status': 'fail',
                 'message': 'Client already exists. Please Log in.',
+                'error_code': 6,
             }
             return make_response(jsonify(responseObject)), 202
 
@@ -102,14 +105,16 @@ class AuthLoginAPI(MethodView):
             else:
                 responseObject = {
                     'status': 'fail',
-                    'message': 'Invalid client credentials.'
+                    'message': 'Invalid client credentials.',
+                    'error_code': 7
                 }
                 return make_response(jsonify(responseObject)), 404
         except Exception as e:
             print(e)
             responseObject = {
                 'status': 'fail',
-                'message': 'Try again'
+                'message': 'Try again',
+                'error_code': 8
             }
             return make_response(jsonify(responseObject)), 500
 
@@ -141,20 +146,23 @@ class AuthLogoutAPI(MethodView):
                 except Exception as e:
                     responseObject = {
                         'status': 'fail',
-                        'message': e
+                        'message': e,
+                        'error_code': 9
                     }
                     return make_response(jsonify(responseObject)), 200
             else:
                 # import pdb; pdb.set_trace()
                 responseObject = {
                     'status': 'fail',
-                    'message': resp
+                    'message': resp,
+                    'error_code': 10
                 }
                 return make_response(jsonify(responseObject)), 401
         else:
             responseObject = {
                 'status': 'fail',
-                'message': 'Provide a valid auth token.'
+                'message': 'Provide a valid auth token.',
+                'error_code': 11
             }
             return make_response(jsonify(responseObject)), 403
 

@@ -69,8 +69,8 @@ class UserStatus(db.Model):
         db.String, db.ForeignKey("users.user_id"), primary_key=True, nullable=False
     )
     study_phase = db.Column(db.Enum(UserStudyPhaseEnum), nullable=False)
-    morning_notification_time_start = db.Column(db.Integer, nullable=True)
-    evening_notification_time_start = db.Column(db.Integer, nullable=True)
+    morning_notification_time_start = db.Column(ARRAY(db.Integer), nullable=False)
+    evening_notification_time_start = db.Column(ARRAY(db.Integer), nullable=False)
     current_decision_index = db.Column(db.Integer, nullable=False, default=0)
     current_time_of_day = db.Column(db.Integer, nullable=False, default=0)
     study_day = db.Column(db.Integer, nullable=False, default=0)
@@ -79,8 +79,8 @@ class UserStatus(db.Model):
         self,
         user_id: str,
         study_phase: UserStudyPhaseEnum,
-        morning_notification_time_start: int,
-        evening_notification_time_start: int,
+        morning_notification_time_start: list,
+        evening_notification_time_start: list,
         current_decision_index: int = 0,
         current_time_of_day: int = 1,
         study_day: int = 0,
@@ -131,6 +131,8 @@ class RLWeights(db.Model):
     update_timestamp = db.Column(db.DateTime, nullable=False)
     posterior_mean_array = db.Column(ARRAY(db.Float), nullable=True)
     posterior_var_array = db.Column(ARRAY(db.Float), nullable=True)
+    posterior_theta_pop_mean_array = db.Column(ARRAY(db.Float), nullable=True)
+    posterior_theta_pop_var_array = db.Column(ARRAY(db.Float), nullable=True)
     noise_var = db.Column(db.Float, nullable=True)
     random_eff_cov_array = db.Column(ARRAY(db.Float), nullable=True)
     code_commit_id = db.Column(
@@ -143,6 +145,8 @@ class RLWeights(db.Model):
         update_timestamp: datetime.datetime,
         posterior_mean_array: list,
         posterior_var_array: list,
+        posterior_theta_pop_mean_array: list,
+        posterior_theta_pop_var_array: list,
         noise_var: float,
         random_eff_cov_array: list,
         code_commit_id: str = app.config.get("CODE_VERSION"),
@@ -151,6 +155,8 @@ class RLWeights(db.Model):
         self.update_timestamp = update_timestamp
         self.posterior_mean_array = posterior_mean_array
         self.posterior_var_array = posterior_var_array
+        self.posterior_theta_pop_mean_array = posterior_theta_pop_mean_array
+        self.posterior_theta_pop_var_array = posterior_theta_pop_var_array
         self.noise_var = noise_var
         self.random_eff_cov_array = random_eff_cov_array
         self.code_commit_id = code_commit_id
@@ -170,8 +176,8 @@ class RLActionSelection(db.Model):
         db.String, db.ForeignKey("users.user_id"), primary_key=True, nullable=False
     )
     user_decision_idx = db.Column(db.Integer, primary_key=True, nullable=False)
-    morning_notification_time = db.Column(db.Integer, nullable=False)
-    evening_notification_time = db.Column(db.Integer, nullable=False)
+    morning_notification_time = db.Column(ARRAY(db.Integer), nullable=False)
+    evening_notification_time = db.Column(ARRAY(db.Integer), nullable=False)
     day_in_study = db.Column(db.Integer, nullable=False)
     action = db.Column(db.Integer, nullable=False)
     policy_id = db.Column(db.Integer, nullable=False)
@@ -179,7 +185,7 @@ class RLActionSelection(db.Model):
     # policy_creation_time = db.Column(db.DateTime, nullable=False)
     prior_ema_completion_time = db.Column(db.String, nullable=True)
     action_selection_timestamp = db.Column(db.DateTime, nullable=True)
-    push_notification_timestamp = db.Column(db.String, nullable=True)
+    messasge_sent_notification_timestamp = db.Column(db.String, nullable=True)
     message_click_notification_timestamp = db.Column(db.String, nullable=True)
     act_prob = db.Column(db.Float, nullable=True)
     cannabis_use = db.Column(ARRAY(db.Float), nullable=True)
@@ -194,15 +200,15 @@ class RLActionSelection(db.Model):
         self,
         user_id: str,
         user_decision_idx: int,
-        morning_notification_time: int,
-        evening_notification_time: int,
+        morning_notification_time: list,
+        evening_notification_time: list,
         day_in_study: int,
         action: int,
         policy_id: int,
         seed: int,
         # policy_creation_time: datetime.datetime,
         prior_ema_completion_time: str = None,
-        push_notification_timestamp: str = None,
+        message_sent_notification_timestamp: str = None,
         action_selection_timestamp: datetime.datetime = None,
         message_click_notification_timestamp: str = None,
         act_prob: float = None,
@@ -223,7 +229,7 @@ class RLActionSelection(db.Model):
         # self.policy_creation_time = policy_creation_time
         self.prior_ema_completion_time = prior_ema_completion_time
         self.action_selection_timestamp = action_selection_timestamp
-        self.push_notification_timestamp = push_notification_timestamp
+        self.message_sent_notification_timestamp = message_sent_notification_timestamp
         self.message_click_notification_timestamp = message_click_notification_timestamp
         self.act_prob = act_prob
         self.cannabis_use = cannabis_use
@@ -261,7 +267,7 @@ class UserActionHistory(db.Model):
         user_id: str,
         decision_idx: int,
         finished_ema: bool,
-        activity_question_response: bool,
+        activity_question_response: str,
         app_use_flag: bool,
         cannabis_use: list,
         reward: float,

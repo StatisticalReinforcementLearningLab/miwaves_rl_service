@@ -23,12 +23,14 @@ def token_required(f):
                     "message": "Bearer token malformed.",
                     "data": None,
                     "status": "Unauthorized",
+                    "error_code": 0,
                 }, 401
         if not token:
             return {
                 "message": "Authentication Token is missing!",
                 "data": None,
                 "status": "Unauthorized",
+                "error_code": 1,
             }, 401
         try:
             data = Client.decode_auth_token(token)
@@ -39,12 +41,14 @@ def token_required(f):
                 return {
                     "message": "Invalid Authentication token!",
                     "status": "Unauthorized",
+                    "error_code": 2,
                 }, 401
         except Exception as e:
             print(e)
             return {
                 "message": "Something went wrong",
                 "status": "Internal Server Error",
+                "error_code": 3,
             }, 500
 
         return f(*args, **kwargs)
