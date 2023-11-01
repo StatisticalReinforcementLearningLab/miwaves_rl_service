@@ -23,6 +23,7 @@ engagement_backlog = config["STUDY"]["ENGAGEMENT_DATA_WINDOW"]
 cannabis_use_backlog = config["STUDY"]["CANNABIS_USE_DATA_WINDOW"]
 engagement_threshold = config["STUDY"]["ENGAGEMENT_THRESHOLD"]
 cannabis_use_threshold = config["STUDY"]["CANNABIS_USE_THRESHOLD"]
+api_token = config["BACKEND"]["API_TOKEN"]
 
 database_name = "flask_jwt_auth"
 postgres_local_base = (
@@ -35,6 +36,12 @@ postgres_local_base = (
 backend_api = backend_host
 ema_api = backend_api + ema_route
 action_api = backend_api + action_route
+
+headers={
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    "Authorization": "Bearer " + api_token
+}
 
 
 class BaseConfig:
@@ -55,6 +62,7 @@ class BaseConfig:
     ENGAGEMENT_THRESHOLD = float(engagement_threshold)
     CANNABIS_USE_THRESHOLD = float(cannabis_use_threshold)
     STUDY_INDEX = 0
+    HEADERS = headers
 
 
 class DevelopmentConfig(BaseConfig):

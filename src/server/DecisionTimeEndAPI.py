@@ -1,4 +1,5 @@
 import datetime
+import json
 from src.server.ActionsAPI import ActionsAPI
 from src.server import app, db
 from src.server.tables import (
@@ -195,7 +196,10 @@ class DecisionTimeEndAPI(MethodView):
             }
 
             # Get the latest ema data for the user from the backend api
-            data = requests.post(ema_url, data=payload).json()
+            data = requests.post(ema_url, 
+                                 data=json.dumps(payload),
+                                 headers=app.config.get("HEADERS")
+                                 ).json()
 
             if data["status"] == "fail":
                 return False, data["message"]
