@@ -6,7 +6,7 @@ from functools import wraps
 
 import jwt
 from flask import request, abort
-from flask import current_app
+from src.server import app
 from src.server.auth.models import Client
 
 
@@ -19,6 +19,7 @@ def token_required(f):
             try:
                 token = token.split(" ")[1]
             except IndexError:
+                app.logger.error("Bearer token malformed.")
                 return {
                     "message": "Bearer token malformed.",
                     "data": None,
@@ -38,13 +39,14 @@ def token_required(f):
             if not isinstance(data, str):
                 current_client = Client.query.filter_by(id = data).first()
             if current_client is None:
+                app.logger.error("Client not found. Invalid Authentication token!")
                 return {
                     "message": "Invalid Authentication token!",
                     "status": "Unauthorized",
                     "error_code": 2,
                 }, 401
         except Exception as e:
-            print(e)
+            app.logger.error(e)
             return {
                 "message": "Something went wrong",
                 "status": "Internal Server Error",

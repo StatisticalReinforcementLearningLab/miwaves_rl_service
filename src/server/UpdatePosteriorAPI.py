@@ -55,7 +55,7 @@ class UpdatePosteriorAPI(MethodView):
                 if hasattr(tablename, "__tablename__"):
                     self.export_table(tablename, time)
         except Exception as e:
-            # TODO: put this in logger
+            app.logger.error("Error backing up tables: ", e)
             if app.config.get("DEBUG"):
                 print("Error backing up tables: ", e)
 
@@ -69,14 +69,14 @@ class UpdatePosteriorAPI(MethodView):
             timenow = datetime.datetime.now()
 
             # log the time when the update request was received
-            # TODO: Put this in logger
-            print("Update model request received at: ", timenow)
+            app.logger.info("Update model request received at: %s", timenow)
+            if app.config.get("DEBUG"):
+                print("Update model request received at: ", timenow)
 
             # First backup all the tables
             status, message, location, ec = self.backup_all_tables(timenow)
 
             if not status:
-                # TODO: put this in logger
                 return return_fail_response(message, 500, ec)
 
             # Get all the data from the RLActionSelection table
@@ -100,10 +100,9 @@ class UpdatePosteriorAPI(MethodView):
                 # TODO: put this in logger
                 return return_fail_response(message, 500, ec)
             
-            if app.config.get("DEBUG"):
-                app.logger.info("Updated posterior")
-                app.logger.info("policyid: " + str(policyid))
-                app.logger.info("params: " + str(params))
+            app.logger.info("Updated posterior")
+            app.logger.info("policyid: " + str(policyid))
+            app.logger.info("params: " + str(params))
 
             # Create a RLWeights object
             rl_weights = RLWeights(
@@ -126,6 +125,8 @@ class UpdatePosteriorAPI(MethodView):
                 db.session.add(rl_weights)
                 db.session.commit()
             except Exception as e:
+                app.logger.error("Error adding rl_weights to internal database: %s", e)
+                app.logger.error(traceback.format_exc())
                 if app.config.get("DEBUG"):
                     print(e)
                     traceback.print_exc()
@@ -134,8 +135,9 @@ class UpdatePosteriorAPI(MethodView):
                     "Some error occurred. Please try again.", 500, 401
                 )
             else:
-                # TODO: put this in logger
-                print("DB Committed new rl_weights")
+                if app.config.get("DEBUG"):
+                    print("DB Committed new rl_weights")
+                app.logger.info("DB Committed new rl_weights")
 
                 responseObject = {
                     "status": "success",
@@ -146,6 +148,8 @@ class UpdatePosteriorAPI(MethodView):
                 return make_response(jsonify(responseObject)), 201
 
         except Exception as e:
+            app.logger.error("Error updating hyper-parameters: %s", e)
+            app.logger.error(traceback.format_exc())
             if app.config.get("DEBUG"):
                 print(e)
                 traceback.print_exc()

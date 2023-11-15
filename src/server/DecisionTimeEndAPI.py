@@ -235,6 +235,7 @@ class DecisionTimeEndAPI(MethodView):
             }
 
             print(json.dumps(payload))
+            app.logger.info("Payload sent to the backend api: %s", payload)
 
             # Get the latest ema data for the user from the backend api
             data = requests.post(
@@ -243,7 +244,8 @@ class DecisionTimeEndAPI(MethodView):
 
             if app.config.get("DEBUG"):
                 print(data)
-                app.logger.info("Data returned from the backend api: %s", data)
+                
+            app.logger.info("Data returned from the backend api: %s", data)
 
             if data["status"] == "fail":
                 return False, data["message"], 316
@@ -305,6 +307,10 @@ class DecisionTimeEndAPI(MethodView):
                     print(value.get("rid"))
                     print(action_history)
 
+                    app.logger.info("RID: %s", value.get("rid"))
+                    app.logger.info("Action history: %s", action_history)
+                    
+
                     cb_use = value.get("cannabis_use")
                     if cb_use == "NA":
                         cb_use = []
@@ -323,6 +329,9 @@ class DecisionTimeEndAPI(MethodView):
                         if app.config.get("DEBUG"):
                             print(e)
                             traceback.print_exc()
+                        app.logger.error(
+                            "Error occured in update_data: %s", traceback.format_exc()
+                        )
                         return (
                             False,
                             "Some error occurred while updating the algorithm with the data.",

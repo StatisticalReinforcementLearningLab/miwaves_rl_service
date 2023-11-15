@@ -38,8 +38,6 @@ class ActionsAPI(MethodView):
         if post_data.get("app_use_flag") is None or not isinstance(
             post_data.get("app_use_flag"), bool
         ):
-            print(type(post_data.get("app_use_flag")))
-            print(post_data.get("app_use_flag"))
             return False, "Please provide a valid app use flag.", 202
         # if not post_data.get("activity_question_response"):
         #     return False, "Please provide a valid activity question response."
@@ -224,8 +222,6 @@ class ActionsAPI(MethodView):
                     try:
                         reward = algorithm.make_reward(raw_reward_data)
                     except Exception as e:
-                        if app.config.get("DEBUG"):
-                            print(e)
                         app.logger.critical("Failed to compute reward")
                         return return_fail_response(
                             message="Failed to compute reward",
@@ -243,10 +239,9 @@ class ActionsAPI(MethodView):
                     try:
                         state = algorithm.make_state(raw_state_data)
                     except Exception as e:
-                        if app.config.get("DEBUG"):
-                            print(e)
                         app.logger.critical("Failed to compute state")
                         app.logger.critical(traceback.format_exc())
+                        app.logger.critical(e)
                         return return_fail_response(
                             message="Failed to compute state",
                             code=202,
@@ -280,10 +275,9 @@ class ActionsAPI(MethodView):
 
                     except Exception as e:
                         db.session.rollback()
-                        if app.config.get("DEBUG"):
-                            print(e)
                         app.logger.critical("Failed to compute action")
                         app.logger.critical(traceback.format_exc())
+                        app.logger.critical(e)
                         return return_fail_response(
                             message="Failed to compute action",
                             code=202,
@@ -293,10 +287,9 @@ class ActionsAPI(MethodView):
                         app.logger.info(f"Action for user {user_id} at {decision_idx} is {action}")
 
                 except Exception as e:
-                    if app.config.get("DEBUG"):
-                        print(e)
                     app.logger.error("Some error occurred while getting actions")
                     app.logger.error(traceback.format_exc())
+                    app.logger.critical(e)
                     return return_fail_response(
                         message="Some error occurred. Please try again.",
                         code=401,
@@ -315,15 +308,15 @@ class ActionsAPI(MethodView):
                         "act_prob": act_prob,
                         "policy_id": policy_id,
                         "decision_index": decision_idx,
-                        "act_gen_timestamp": new_useraction.timestamp,
+                        "act_gen_timestamp": new_useraction.timestamp.isoformat(),
                     }
 
                     return make_response(jsonify(responseObject)), 200
 
         except Exception as e:
-            print(e)
             app.logger.error("Some error occurred while getting actions")
             app.logger.error(traceback.format_exc())
+            app.logger.error(e)
             return return_fail_response(
                 message="Some error occurred. Please try again.",
                 code=401,

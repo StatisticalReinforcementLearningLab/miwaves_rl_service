@@ -90,8 +90,11 @@ class RegisterAPI(MethodView):
                     db.session.add(user_status)
                 except Exception as e:
                     db.session.rollback()
-                    print(e)  # TODO: Set it to logger
-                    traceback.print_exc()
+                    app.logger.error("Error adding user info to internal database: %s", e)
+                    app.logger.error(traceback.format_exc())
+                    if app.config.get("DEBUG"):
+                        print(e)
+                        traceback.print_exc()
                     error_message = "Some error occurred while adding user info to internal database. Please try again."
                     ec = 107
                     return return_fail_response(error_message, 401, ec)
@@ -108,7 +111,10 @@ class RegisterAPI(MethodView):
                 return return_fail_response(message, 202, ec)
             
         except Exception as e:
-            print(e)  # TODO: Set it to logger
+            if app.config.get("DEBUG"):
+                print(e)  # TODO: Set it to logger
+            app.logger.error("Error adding user info to internal database: %s", e)
+            app.logger.error(traceback.format_exc())
             db.session.rollback()
             message = "Some error occurred while adding user info to internal database. Please try again."
             ec = 109
