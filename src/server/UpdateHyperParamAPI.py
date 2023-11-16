@@ -4,15 +4,55 @@ import os
 import pandas as pd
 from src.server import db, app
 from src.server.auth.auth import token_required
-from src.server.tables import RLActionSelection, RLWeights
+from src.server.tables import RLActionSelection
 from src.server.helpers import return_fail_response
 
 
 from flask import jsonify, make_response, request
 from flask.views import MethodView
 
+import threading
+import time
+
 import traceback
 import csv
+
+# @shared_task(ignore_result=False)
+def update_hyperparam_task():
+    """Background task for updating hyper-parameters"""
+
+    # Sleep 10 seconds
+    time.sleep(10)
+
+    try:
+
+        with app.app_context():
+            # Get all the data from the RLActionSelection table
+            rl_action_selection = db.session.query(RLActionSelection)
+
+            # Convert to pandas dataframe
+            data = pd.read_sql(
+                str(rl_action_selection.statement), db.engine.connect().connection
+            )
+
+            # Get the algorithm
+            algorithm = app.config.get("ALGORITHM")
+
+            status, message, _, _, _ = algorithm.update(data,
+                                                    update_posterior=False,
+                                                    update_hyperparam=True,
+                                                    use_data=False)
+        
+            if not status:
+                app.logger.error("Error updating hyper-parameters: %s", message)
+
+    except Exception as e:
+        app.logger.error("Error updating hyper-parameters: %s", e)
+        app.logger.error(traceback.format_exc())
+        if app.config.get("DEBUG"):
+            print(e)
+            traceback.print_exc()
+    
 
 
 class UpdateHyperParamAPI(MethodView):
@@ -76,73 +116,32 @@ class UpdateHyperParamAPI(MethodView):
             # First backup all the tables
             status, message, location, ec = self.backup_all_tables(timenow)
 
+            app.logger.info("Backup status: %s", status)
+            app.logger.info("Backup message: %s", message)
+            app.logger.info("Backup location: %s", location)
+
             if not status:
                 return return_fail_response(message, 500, ec)
-
-            # Get all the data from the RLActionSelection table
-            rl_action_selection = db.session.query(RLActionSelection)
-
-            # Convert to pandas dataframe
-            data = pd.read_sql(
-                str(rl_action_selection.statement), db.engine.connect().connection
-            )
-
-            # Get the algorithm
-            algorithm = app.config.get("ALGORITHM")
 
             # Send the data to the rl algorithm update
-            status, message, policyid, params, ec = algorithm.update(data,
-                                                                     update_posterior=False,
-                                                                     update_hyperparam=True,
-                                                                     use_data=False)
+            # task_result = update_hyperparam_task.delay()
+            bg_task = threading.Thread(target=update_hyperparam_task)
+            bg_task.daemon = True
+            bg_task.start()
+            
+            # task_result = update_hyperparam_task()
 
-            if not status:
-                # TODO: put this in logger
-                return return_fail_response(message, 500, ec)
+            # if app.config.get("DEBUG"):
+            #     print("Scheduled update of hyperparameters: %s", task_result.id)
+            # app.logger.info("Scheduled update of hyperparameters: %s", task_result.id)
 
-            # Create a RLWeights object
-            rl_weights = RLWeights(
-                update_timestamp=timenow,
-                posterior_mean_array=params.get("posterior_mean_array"),
-                posterior_var_array=params.get("posterior_cov_array"),
-                posterior_theta_pop_mean_array=params.get(
-                    "posterior_theta_pop_mean_array"
-                ),
-                posterior_theta_pop_var_array=params.get(
-                    "posterior_theta_pop_var_array"
-                ),
-                noise_var=params.get("noise_var"),
-                random_eff_cov_array=params.get("random_eff_cov_array"),
-                data_pickle_file_path=location,
-            )
+            responseObject = {
+                "status": "success",
+                "message": "Scheduled update of hyperparameters",
+                # "taskid": task_result.id,
+            }
 
-            # Add the rl_weights object to the database
-            try:
-                db.session.add(rl_weights)
-                db.session.commit()
-            except Exception as e:
-                app.logger.error("Error adding rl_weights to internal database: %s", e)
-                app.logger.error(traceback.format_exc())
-                if app.config.get("DEBUG"):
-                    print(e)
-                    traceback.print_exc()
-                db.session.rollback()
-                return return_fail_response(
-                    "Some error occurred. Please try again.", 500, 401
-                )
-            else:
-                # TODO: put this in logger
-                if app.config.get("DEBUG"):
-                    print("DB Committed new rl_weights")
-                app.logger.info("DB Committed new rl_weights")
-
-                responseObject = {
-                    "status": "success",
-                    "message": "Successfully updated hyper-parameters.",
-                    "policyid": policyid,
-                }
-
-                return make_response(jsonify(responseObject)), 201
+            return make_response(jsonify(responseObject)), 201
 
         except Exception as e:
             app.logger.error("Error updating hyper-parameters: %s", e)

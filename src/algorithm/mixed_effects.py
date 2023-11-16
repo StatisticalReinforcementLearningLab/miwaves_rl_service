@@ -155,15 +155,8 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         self.policyid = 0
         self.param_size = param_size
 
-        # self.mu_0 = np.kron(np.ones(self.num_users), self.prior_mean)
-        # self.mu_0 = None
-        # self.Sigma_0 = np.kron(
-        #     np.ones((self.num_users, self.num_users)), self.prior_cov
-        # )
-        # self.Sigma_0 = None
-        # self.Sigma_theta_t = self.Sigma_0 + np.kron(
-        #     np.identity(self.num_users), self.sigma_u
-        # )
+        self.hyperparam_update_flag = False
+
         self.posterior_mean = None
         self.posterior_cov = None
         self.posterior_mean_history = []
@@ -485,7 +478,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         # Check for dataframe columns
         if use_data:
             raise NotImplementedError("use_data is not implemented yet")
-
+        
         # Create the A, B matrix
         (
             A,
@@ -509,6 +502,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         skip_count = 0
         last_update_index = -1
         reset_flag = False
+        sigma_u_shape = self.sigma_u.shape[0]
 
         lr = lr2 = self.learning_rate
 
@@ -522,7 +516,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
             mu_0,
             self.prior_cov,
             sum_sq_reward,
-            self.sigma_u.shape[0],
+            sigma_u_shape,
             total_update_users,
             total_ts,
         )
@@ -543,7 +537,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
                 mu_0,
                 self.prior_cov,
                 sum_sq_reward,
-                self.sigma_u.shape[0],
+                sigma_u_shape,
                 total_update_users,
                 total_ts,
             )
@@ -577,7 +571,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
                 mu_0,
                 self.prior_cov,
                 sum_sq_reward,
-                self.sigma_u.shape[0],
+                sigma_u_shape,
                 total_update_users,
                 total_ts,
             )
@@ -589,7 +583,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
                 mu_0,
                 self.prior_cov,
                 sum_sq_reward,
-                self.sigma_u.shape[0],
+                sigma_u_shape,
                 total_update_users,
                 total_ts,
             )
@@ -612,7 +606,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
                 mu_0,
                 self.prior_cov,
                 sum_sq_reward,
-                self.sigma_u.shape[0],
+                sigma_u_shape,
                 total_update_users,
                 total_ts,
             )
@@ -679,16 +673,19 @@ class MixedEffectsAlgorithm(RLAlgorithm):
             elif skip_count == 0:
                 old_obj = obj_val
 
-        # Update the noise variance
-        self.noise_var = 1.0 / min_noise_var_inv
-        self.noise_var_history.append(self.noise_var)
+        # Set the new noise variance and assign it a pending status
+        self.noise_var_pending = 1.0 / min_noise_var_inv
 
         # Update the sigma_u
-        self.ltu_flat = min_ltu_flat
+        self.ltu_flat_pending = min_ltu_flat
+
         L = np.zeros(self.sigma_u.shape, dtype=float)
-        L[np.tril_indices(self.sigma_u.shape[0])] = self.ltu_flat
-        self.sigma_u = L @ L.T
-        self.sigma_u_history.append(np.array(self.sigma_u))
+        L[np.tril_indices(sigma_u_shape)] = self.ltu_flat_pending
+        self.sigma_u_pending = L @ L.T
+
+        # Set the flag to update the hyperparameters
+        self.hyperparam_update_flag = True
+
 
     def update_posteriors(
         self, data: pd.DataFrame, use_data: bool = False, debug: bool = False
@@ -704,6 +701,22 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         # TODO: Update just using the data in the dataframe
         if use_data:
             raise NotImplementedError("use_data is not implemented yet")
+        
+        # Check if the hyperparameters have been updated
+        if self.hyperparam_update_flag:
+            self.sigma_u = copy.deepcopy(self.sigma_u_pending)
+            self.noise_var = copy.deepcopy(self.noise_var_pending)
+            self.ltu_flat = copy.deepcopy(self.ltu_flat_pending)
+
+            # Save in history
+            self.sigma_u_history.append(np.array(self.sigma_u))
+            self.noise_var_history.append(self.noise_var)
+            
+            # Reset the flag
+            self.hyperparam_update_flag = False
+
+            # Log event to logger
+            self.logger.debug("Hyperparameters updated, and used in posterior calculation")
 
         (
             A,
@@ -778,6 +791,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         if update_hyperparam:
             try:
                 self.update_hyperparameters(data, use_data)
+                self.logger.debug("Hyperparameters computed and staged for update")
             except Exception as e:
                 if self.debug:
                     self.logger.error(
@@ -792,6 +806,9 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         if update_posterior:
             try:
                 self.update_posteriors(data, use_data)
+                # Update the current policyid
+                self.policyid += 1
+                self.logger.debug("Posteriors updated")
             except Exception as e:
                 if self.debug:
                     self.logger.error(
@@ -801,9 +818,6 @@ class MixedEffectsAlgorithm(RLAlgorithm):
                     self.logger.error(traceback.format_exc())
                 message = "Error while updating posteriors"
                 return False, message, self.policyid, {}, 404
-
-        # Update the current policyid
-        self.policyid += 1
 
         # Return the parameters
         try:
