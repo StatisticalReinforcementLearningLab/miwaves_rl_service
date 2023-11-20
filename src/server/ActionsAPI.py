@@ -39,10 +39,13 @@ class ActionsAPI(MethodView):
             post_data.get("app_use_flag"), bool
         ):
             return False, "Please provide a valid app use flag.", 202
-        # if not post_data.get("activity_question_response"):
-        #     return False, "Please provide a valid activity question response."
-        # if not post_data.get("cannabis_use"):
-        #     return False, "Please provide a valid cannabis use."
+        if post_data.get("finished_ema") == True:
+            if post_data.get("activity_question_response") is None or not isinstance(
+                post_data.get("activity_question_response"), bool
+            ):
+                return False, "Please provide a valid activity question response.", 209
+            if not post_data.get("cannabis_use") or post_data.get("cannabis_use") == "NA":
+                return False, "Please provide a valid cannabis use.", 210
         return True, None, None
 
 

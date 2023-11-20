@@ -230,8 +230,8 @@ class DecisionTimeEndAPI(MethodView):
             # Create payload for the backend api
             payload = {
                 "user_id": user_id,
-                "start_time": start_time.strftime("%Y-%m-%d  %H:%M:%S"),
-                "end_time": end_time.strftime("%Y-%m-%d  %H:%M:%S"),
+                "start_time": start_time.isoformat(),
+                "end_time": end_time.isoformat(),
             }
 
             print(json.dumps(payload))

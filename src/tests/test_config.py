@@ -10,7 +10,7 @@ CONFIG_INI = "config.ini"
 class TestDevelopmentConfig(TestCase):
     """Test development configuration."""
     def create_app(self):
-        app.config.from_object('src.auth.config.DevelopmentConfig')
+        app.config.from_object('src.server.config.DevelopmentConfig')
         return app
 
     def test_app_is_development(self):
@@ -29,7 +29,7 @@ class TestDevelopmentConfig(TestCase):
 class TestTestingConfig(TestCase):
     """Test testing configuration."""
     def create_app(self):
-        app.config.from_object('src.auth.config.TestingConfig')
+        app.config.from_object('src.server.config.TestingConfig')
         return app
 
     def test_app_is_testing(self):

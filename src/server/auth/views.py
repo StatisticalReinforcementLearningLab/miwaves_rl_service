@@ -26,7 +26,7 @@ class AuthRegisterAPI(MethodView):
             if number_of_users != 0:
                 responseObject = {
                     'status': 'fail',
-                    'message': 'No more users allowed to register.',
+                    'message': 'No more clients allowed to register.',
                     'error_code': 4,
                 }
                 return make_response(jsonify(responseObject)), 202

@@ -873,7 +873,8 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         # TODO: Change based on 12/24 hour weighted avg.
         # cannabis_use_data = params["cannabis_use_data"]
 
-        print("engagement_data", engagement_data)
+        # print("engagement_data", engagement_data)
+        # print("recent_cannabis_use", recent_cannabis_use)
 
         average_reward = np.mean([*engagement_data[-2:], reward])
 
@@ -887,12 +888,12 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         S2 = time_of_day
 
         # TODO: Change this to hourly timings
-        if np.any(recent_cannabis_use == 1):
+        if recent_cannabis_use.size == 0:
+            S3 = 0
+        elif np.any(recent_cannabis_use == 1):
             S3 = 0
         elif np.all(recent_cannabis_use == 0):
             S3 = 1
-        else:
-            S3 = 0
 
         return [S1, S2, S3]
 

@@ -68,8 +68,6 @@ class RegisterAPI(MethodView):
                         "rl_start_date"
                     ),  # TODO: Change based on Pei-Yao's specification
                     consent_end_date=post_data.get("rl_end_date"),
-                    # study_level_start_index=post_data.get("study_level_start_index"), #TODO: for now not required
-                    # study_level_end_index=post_data.get("study_level_end_index"),
                 )
 
                 user_status = UserStatus(
@@ -104,7 +102,7 @@ class RegisterAPI(MethodView):
                         "status": "success",
                         "message": f"User {post_data.get('user_id')} was added!",
                     }
-                    return make_response(jsonify(responseObject)), 200
+                    return make_response(jsonify(responseObject)), 201
             else:
                 message = f"User {post_data.get('user_id')} already exists."
                 ec = 108

@@ -26,7 +26,7 @@ class UpdatePosteriorAPI(MethodView):
         # Create filename
         filename = f"{tablename.__tablename__}_{time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
 
-        folder = f"./data/backups/{time}"
+        folder = f"./data/backups/{time.strftime('%Y-%m-%d_%H-%M-%S')}"
 
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -61,7 +61,7 @@ class UpdatePosteriorAPI(MethodView):
 
             return False, "Error backing up tables: " + str(e), None, 400
 
-        return True, None, f"./data/backups/{time}", None
+        return True, None, f"./data/backups/{time.strftime('%Y-%m-%d_%H-%M-%S')}", None
 
     @token_required
     def post(self):
@@ -106,6 +106,7 @@ class UpdatePosteriorAPI(MethodView):
 
             # Create a RLWeights object
             rl_weights = RLWeights(
+                policy_id=policyid,
                 update_timestamp=timenow,
                 posterior_mean_array=params.get("posterior_mean_array"),
                 posterior_var_array=params.get("posterior_var_array"),

@@ -13,7 +13,12 @@ COV = coverage.coverage(
     include='src/*',
     omit=[
         'src/auth/config.py',
-        'src/auth/*/__init__.py'
+        'src/algorithm/base.py',
+        'src/algorithm/__init__.py',
+        'src/auth/*/__init__.py',
+        'src/server/*/__init__.py',
+        'src/server/__init__.py',
+        'src/tests/*'
     ]
 )
 COV.start()

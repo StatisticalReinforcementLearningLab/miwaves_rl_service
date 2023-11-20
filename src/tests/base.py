@@ -10,7 +10,7 @@ class BaseTestCase(TestCase):
     """ Base Tests """
 
     def create_app(self):
-        app.config.from_object('src.auth.config.TestingConfig')
+        app.config.from_object('src.server.config.TestingConfig')
         return app
 
     def setUp(self):

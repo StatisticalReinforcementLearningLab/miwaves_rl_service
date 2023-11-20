@@ -91,17 +91,6 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CODE_VERSION = code_version
     # ALGORITHM = flat_prob.FlatProbabilityAlgorithm()
-    ALGORITHM = mixed_effects.MixedEffectsAlgorithm(
-        num_days=study_length,
-        prior_mean=PRIOR_MEAN,
-        prior_cov=PRIOR_VAR,
-        init_cov_u=INIT_SIGMA_U,
-        init_noise_var=init_noise_var,
-        alloc_func=allocation_function,
-        rng=np.random.default_rng(int(seed)),
-        debug=True,
-        logger_path="./data/logs",
-    )
     BACKEND_API = backend_api
     EMA_API = ema_api
     ACTION_API = action_api
@@ -118,6 +107,19 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = postgres_local_base + database_name
 
+    
+    ALGORITHM = mixed_effects.MixedEffectsAlgorithm(
+        num_days=study_length,
+        prior_mean=PRIOR_MEAN,
+        prior_cov=PRIOR_VAR,
+        init_cov_u=INIT_SIGMA_U,
+        init_noise_var=init_noise_var,
+        alloc_func=allocation_function,
+        rng=np.random.default_rng(int(seed)),
+        debug=True,
+        logger_path="./data/logs",
+    )
+
 
 class TestingConfig(BaseConfig):
     """Testing configuration."""
@@ -127,6 +129,21 @@ class TestingConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = postgres_local_base + database_name + "_test"
     PRESERVE_CONTEXT_ON_EXCEPTION = False
 
+    EMA_API = "http://localhost:4000/ema_study"
+
+    
+    ALGORITHM = mixed_effects.MixedEffectsAlgorithm(
+        num_days=study_length,
+        prior_mean=PRIOR_MEAN,
+        prior_cov=PRIOR_VAR,
+        init_cov_u=INIT_SIGMA_U,
+        init_noise_var=init_noise_var,
+        alloc_func=allocation_function,
+        rng=np.random.default_rng(0),
+        debug=True,
+        logger_path="./data/logs",
+    )
+
 
 class ProductionConfig(BaseConfig):
     """Production configuration."""
@@ -134,3 +151,16 @@ class ProductionConfig(BaseConfig):
     SECRET_KEY = secret_key
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = postgres_local_base + database_name
+
+    
+    ALGORITHM = mixed_effects.MixedEffectsAlgorithm(
+        num_days=study_length,
+        prior_mean=PRIOR_MEAN,
+        prior_cov=PRIOR_VAR,
+        init_cov_u=INIT_SIGMA_U,
+        init_noise_var=init_noise_var,
+        alloc_func=allocation_function,
+        rng=np.random.default_rng(int(seed)),
+        debug=True,
+        logger_path="./data/logs",
+    )

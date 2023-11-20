@@ -15,14 +15,10 @@ class User(db.Model):
     __tablename__ = "users"
 
     user_id = db.Column(db.String, primary_key=True, nullable=False)
-    # start_date = db.Column(db.DateTime, nullable=False)
-    # end_date = db.Column(db.DateTime, nullable=False)
     consent_start_date = db.Column(db.DateTime, nullable=True)
     consent_end_date = db.Column(db.DateTime, nullable=True)
     rl_start_date = db.Column(db.DateTime, nullable=True)
     rl_end_date = db.Column(db.DateTime, nullable=True)
-    # study_level_start_index = db.Column(db.Integer, nullable=True)
-    # study_level_end_index = db.Column(db.Integer, nullable=True)
     # TODO: Add columns for other baseline details of the user
 
     def __init__(
@@ -32,23 +28,12 @@ class User(db.Model):
         consent_end_date: datetime.date,
         rl_start_date: datetime.date,
         rl_end_date: datetime.date,
-        # study_level_start_index: int,
-        # study_level_end_index: int,
     ):
         self.user_id = user_id
         self.consent_start_date = consent_start_date
         self.consent_end_date = consent_end_date
         self.rl_start_date = rl_start_date
         self.rl_end_date = rl_end_date
-
-        # self.study_level_start_index = study_level_start_index
-        # self.study_level_end_index = study_level_end_index
-
-    # def update_study_level_start_index(self, study_level_start_index: int):
-    #     self.study_level_start_index = study_level_start_index
-
-    # def update_study_level_end_index(self, study_level_end_index: int):
-    #     self.study_level_end_index = study_level_end_index
 
 
 class UserStudyPhaseEnum(enum.Enum):
@@ -128,6 +113,7 @@ class RLWeights(db.Model):
     __tablename__ = "rl_weights"
 
     id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    policy_id = db.Column(db.Integer, nullable=False)
     update_timestamp = db.Column(db.DateTime, nullable=False)
     posterior_mean_array = db.Column(ARRAY(db.Float), nullable=True)
     posterior_var_array = db.Column(ARRAY(db.Float), nullable=True)
@@ -142,6 +128,7 @@ class RLWeights(db.Model):
 
     def __init__(
         self,
+        policy_id: int,
         update_timestamp: datetime.datetime,
         posterior_mean_array: list,
         posterior_var_array: list,
@@ -152,6 +139,7 @@ class RLWeights(db.Model):
         code_commit_id: str = app.config.get("CODE_VERSION"),
         data_pickle_file_path: str = None,
     ):
+        self.policy_id = policy_id
         self.update_timestamp = update_timestamp
         self.posterior_mean_array = posterior_mean_array
         self.posterior_var_array = posterior_var_array
