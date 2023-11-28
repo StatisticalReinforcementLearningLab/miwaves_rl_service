@@ -303,19 +303,19 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         design_matrix = np.vstack(design_matrix)
         reward_matrix = np.hstack(reward_matrix)
 
-        A = linalg.block_diag(
-            *[
-                design_matrix[indexes[i] : indexes[i + 1]].T
-                @ design_matrix[indexes[i] : indexes[i + 1]]
-                for i in range(total_update_users)
-            ]
-        )
+        A_hat = [
+            design_matrix[indexes[i] : indexes[i + 1]].T
+            @ design_matrix[indexes[i] : indexes[i + 1]]
+            for i in range(total_update_users)
+        ]
+
+        A = linalg.block_diag(*A_hat)
 
         B = np.array(
             [
                 design_matrix[indexes[i] : indexes[i + 1]].T
                 @ reward_matrix[indexes[i] : indexes[i + 1]]
-                for i in range(self.num_users)
+                for i in range(total_update_users)
             ]
         ).flatten()
 
@@ -323,7 +323,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         for i in range(len(reward_matrix)):
             sum_sq_reward += reward_matrix[i] ** 2
 
-        return A, B, sum_sq_reward, total_timesteps, update_user_list
+        return A, B, A_hat, sum_sq_reward, total_timesteps, update_user_list
 
     def get_action(
         self, user_id: str, state: np.ndarray, decision_time: int, seed: int = -1
@@ -478,11 +478,12 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         # Check for dataframe columns
         if use_data:
             raise NotImplementedError("use_data is not implemented yet")
-        
+
         # Create the A, B matrix
         (
             A,
             B,
+            A_hat,
             sum_sq_reward,
             total_ts,
             update_user_list,
@@ -686,7 +687,6 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         # Set the flag to update the hyperparameters
         self.hyperparam_update_flag = True
 
-
     def update_posteriors(
         self, data: pd.DataFrame, use_data: bool = False, debug: bool = False
     ) -> None:
@@ -701,7 +701,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         # TODO: Update just using the data in the dataframe
         if use_data:
             raise NotImplementedError("use_data is not implemented yet")
-        
+
         # Check if the hyperparameters have been updated
         if self.hyperparam_update_flag:
             self.sigma_u = copy.deepcopy(self.sigma_u_pending)
@@ -711,16 +711,19 @@ class MixedEffectsAlgorithm(RLAlgorithm):
             # Save in history
             self.sigma_u_history.append(np.array(self.sigma_u))
             self.noise_var_history.append(self.noise_var)
-            
+
             # Reset the flag
             self.hyperparam_update_flag = False
 
             # Log event to logger
-            self.logger.debug("Hyperparameters updated, and used in posterior calculation")
+            self.logger.debug(
+                "Hyperparameters updated, and used in posterior calculation"
+            )
 
         (
             A,
             B,
+            A_hat,
             _,
             _,
             update_user_list,
@@ -747,10 +750,45 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         )
 
         # Compute the theta pop posterior mean
-        # pass
+
+        zeta1 = zeta2 = zeta3 = zeta4 = None
+        m_inv = 1.0 / total_update_users
+
+        B_hat = np.array(B).reshape(total_update_users, -1)
+
+        for i in range(total_update_users):
+            psi = self.noise_var * np.linalg.inv(self.sigma_u) + A_hat[i]
+            psi_inv = np.linalg.inv(psi)
+            z1 = B_hat[i]
+            z2 = np.array(A_hat[i]) @ psi_inv @ B_hat[i]
+            z3 = np.array(A_hat[i])
+            z4 = np.array(A_hat[i]) @ psi_inv @ np.array(A_hat[i])
+            zeta1 = z1 if zeta1 is None else zeta1 + z1
+            zeta2 = z2 if zeta2 is None else zeta2 + z2
+            zeta3 = z3 if zeta3 is None else zeta3 + z3
+            zeta4 = z4 if zeta4 is None else zeta4 + z4
+
+        zeta1 = m_inv * np.array(zeta1)
+        zeta2 = m_inv * np.array(zeta2)
+        zeta3 = m_inv * np.array(zeta3)
+        zeta4 = m_inv * np.array(zeta4)
+
+        E = (
+            m_inv * np.linalg.inv(self.prior_cov)
+            + (1.0 / self.noise_var) * zeta3
+            - (1.0 / self.noise_var) * zeta4
+        )
+
+        E_inv = np.linalg.inv(E)
+
+        self.theta_pop_mean = E_inv @ (
+            m_inv * np.linalg.inv(self.prior_cov) @ self.prior_mean.reshape(-1, 1)
+            + (1.0 / self.noise_var) * zeta1.reshape(-1, 1)
+            - (1.0 / self.noise_var) * zeta2.reshape(-1, 1)
+        )
 
         # Compute the theta pop posterior covariance
-        # pass
+        self.theta_pop_cov = m_inv * E_inv
 
         # Update the posterior mean and covariance history
         self.posterior_mean_history.append(self.posterior_mean)
@@ -890,7 +928,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         # TODO: Change this to hourly timings
         if recent_cannabis_use.size == 0:
             S3 = 0
-        elif np.any(recent_cannabis_use == 1):
+        elif np.any(recent_cannabis_use != 0):
             S3 = 0
         elif np.all(recent_cannabis_use == 0):
             S3 = 1
