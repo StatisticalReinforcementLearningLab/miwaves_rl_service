@@ -306,6 +306,7 @@ class DecisionTimeEndAPI(MethodView):
 
                     print(value.get("rid"))
                     print(action_history)
+                    print(action_history.reward)
 
                     app.logger.info("RID: %s", value.get("rid"))
                     app.logger.info("Action history: %s", action_history)
@@ -352,6 +353,7 @@ class DecisionTimeEndAPI(MethodView):
                         action=value.get("action_taken"),
                         policy_id=value.get("policy_id"),
                         seed=value.get("seed"),
+                        rid=int(value.get("rid")),
                         prior_ema_completion_time=value.get("timestamp_finished_ema"),
                         action_selection_timestamp=value.get("act_gen_timestamp"),
                         message_sent_notification_timestamp=value.get("message_notification_sent_time"),

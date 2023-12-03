@@ -91,7 +91,7 @@ class UpdatePosteriorAPI(MethodView):
             algorithm = app.config.get("ALGORITHM")
 
             # Send the data to the rl algorithm update
-            status, message, policyid, params, ec = algorithm.update(data,
+            status, message, policyid, params, ec, user_list, hp_update_id = algorithm.update(data,
                                                                      update_posterior=True,
                                                                      update_hyperparam=False,
                                                                      use_data=False)
@@ -119,6 +119,8 @@ class UpdatePosteriorAPI(MethodView):
                 noise_var=params.get("noise_var"),
                 random_eff_cov_array=params.get("random_eff_cov_array"),
                 data_pickle_file_path=location,
+                user_list=user_list,
+                hp_update_id=hp_update_id,
             )
 
             # Add the rl_weights object to the database

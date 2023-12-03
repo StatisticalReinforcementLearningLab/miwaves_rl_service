@@ -104,6 +104,38 @@ class AlgorithmStatus(db.Model):
         self.current_decision_time = current_decision_time
         self.current_day_in_study = current_day_in_study
 
+class RLHyperParamUpdateRequest(db.Model):
+    """
+    Table to store all the relevant information wrt all the hyperparameter
+    update requests
+    """
+
+    __tablename__ = "rl_hyperparam_update_request"
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    backup_location = db.Column(db.String, nullable=False)
+    request_timestamp = db.Column(db.DateTime, nullable=False)
+    request_status = db.Column(db.String, nullable=False)
+    request_message = db.Column(db.String, nullable=True)
+    request_error_code = db.Column(db.Integer, nullable=True)
+    completed_timestamp = db.Column(db.DateTime, nullable=True)
+
+    def __init__(
+        self,
+        backup_location: str,
+        request_timestamp: datetime.datetime,
+        request_status: str,
+        request_message: str = None,
+        request_error_code: int = None,
+        completed_timestamp: datetime.datetime = None,
+    ):
+        self.backup_location = backup_location
+        self.request_timestamp = request_timestamp
+        self.request_status = request_status
+        self.request_message = request_message
+        self.request_error_code = request_error_code
+        self.completed_timestamp = completed_timestamp
+
 
 class RLWeights(db.Model):
     """Table to store the RL weights. Also stores a link
@@ -125,6 +157,8 @@ class RLWeights(db.Model):
         db.String, nullable=False, default=app.config.get("CODE_VERSION")
     )
     data_pickle_file_path = db.Column(db.String, nullable=False)
+    user_list = db.Column(ARRAY(db.String), nullable=True)
+    hp_update_id = db.Column(db.Integer, nullable=True)
 
     def __init__(
         self,
@@ -136,8 +170,10 @@ class RLWeights(db.Model):
         posterior_theta_pop_var_array: list,
         noise_var: float,
         random_eff_cov_array: list,
+        hp_update_id: int,
         code_commit_id: str = app.config.get("CODE_VERSION"),
         data_pickle_file_path: str = None,
+        user_list: list = None,
     ):
         self.policy_id = policy_id
         self.update_timestamp = update_timestamp
@@ -149,7 +185,8 @@ class RLWeights(db.Model):
         self.random_eff_cov_array = random_eff_cov_array
         self.code_commit_id = code_commit_id
         self.data_pickle_file_path = data_pickle_file_path
-
+        self.user_list = user_list
+        self.hp_update_id = hp_update_id
 
 class RLActionSelection(db.Model):
     """
@@ -183,6 +220,7 @@ class RLActionSelection(db.Model):
     # reward_component_vector = db.Column(ARRAY(db.Float), nullable=True)
     reward = db.Column(db.Float, nullable=True)
     row_complete = db.Column(db.Boolean, nullable=False)
+    rid = db.Column(db.Integer, db.ForeignKey("user_action_history.index"), nullable=False)
 
     def __init__(
         self,
@@ -194,6 +232,7 @@ class RLActionSelection(db.Model):
         action: int,
         policy_id: int,
         seed: int,
+        rid: int,
         # policy_creation_time: datetime.datetime,
         prior_ema_completion_time: str = None,
         message_sent_notification_timestamp: str = None,
@@ -214,6 +253,7 @@ class RLActionSelection(db.Model):
         self.action = action
         self.policy_id = policy_id
         self.seed = seed
+        self.rid = rid
         # self.policy_creation_time = policy_creation_time
         self.prior_ema_completion_time = prior_ema_completion_time
         self.action_selection_timestamp = action_selection_timestamp
@@ -241,7 +281,7 @@ class UserActionHistory(db.Model):
     finished_ema = db.Column(db.Boolean, nullable=False)
     activity_question_response = db.Column(db.String, nullable=True)
     app_use_flag = db.Column(db.Boolean, nullable=False)
-    cannabis_use = db.Column(ARRAY(db.Integer), nullable=True)
+    cannabis_use = db.Column(ARRAY(db.Float), nullable=True)
     reward = db.Column(db.Float, nullable=False)
     state = db.Column(ARRAY(db.Integer), nullable=False)
     action = db.Column(db.Integer, nullable=False)

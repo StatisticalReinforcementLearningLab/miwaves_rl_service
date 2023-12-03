@@ -168,6 +168,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         self.debug = debug
 
         self.last_update_users_list = []
+        self.last_hyperparam_update_id = 0
 
         self.user_list = []
 
@@ -464,12 +465,14 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         return action, int(seed), act_prob, self.policyid
 
     def update_hyperparameters(
-        self, data: pd.DataFrame, use_data: bool = False, debug: bool = False
+        self, request_id: int, data: pd.DataFrame, use_data: bool = False, debug: bool = False
     ) -> None:
         """
         Update the hyperparameters
+        :param request_id: request id
         :param data: data to update algorithm
         :param use_data: whether to use data or not, or use the user_data
+        :param debug: debug flag
         :return: None
         """
 
@@ -683,6 +686,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         L = np.zeros(self.sigma_u.shape, dtype=float)
         L[np.tril_indices(sigma_u_shape)] = self.ltu_flat_pending
         self.sigma_u_pending = L @ L.T
+        self.hyperparam_requestid_pending = request_id
 
         # Set the flag to update the hyperparameters
         self.hyperparam_update_flag = True
@@ -714,10 +718,13 @@ class MixedEffectsAlgorithm(RLAlgorithm):
 
             # Reset the flag
             self.hyperparam_update_flag = False
+            self.last_hyperparam_update_id = self.hyperparam_requestid_pending
 
             # Log event to logger
             self.logger.debug(
-                "Hyperparameters updated, and used in posterior calculation"
+                "Hyperparameters updated for request id {} and used for posterior update".format(
+                    self.last_hyperparam_update_id
+                )
             )
 
         (
@@ -804,7 +811,8 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         update_posterior: bool = True,
         update_hyperparam: bool = False,
         use_data: bool = False,
-    ) -> tuple[bool, str, int, dict, int]:
+        request_id: int = None,
+    ) -> tuple[bool, str, int, dict, int, list, int]:
         """
         Update algorithm
         :param update_posterior: whether to update the posterior or not
@@ -815,6 +823,9 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         :return: error message if algorithm is not updated, None otherwise
         :return: policy id
         :return: algorithm parameters
+        :return: error code
+        :return: list of users whose posteriors were updated
+        :return: last hyperparam update id
         """
         # TODO: Update just using the data in the dataframe
 
@@ -823,13 +834,13 @@ class MixedEffectsAlgorithm(RLAlgorithm):
             try:
                 raise NotImplementedError("use_data is not implemented yet")
             except Exception as e:
-                return False, "use_data is not implemented yet", self.policyid, {}, 405
+                return False, "use_data is not implemented yet", self.policyid, {}, 405, [], None
 
         # Check whether to update the hyperparameters or not
         if update_hyperparam:
             try:
-                self.update_hyperparameters(data, use_data)
-                self.logger.debug("Hyperparameters computed and staged for update")
+                self.update_hyperparameters(request_id=request_id, data=data, use_data=use_data)
+                self.logger.debug("Hyperparameters computed and staged for update with request id: {}".format(request_id))
             except Exception as e:
                 if self.debug:
                     self.logger.error(
@@ -838,7 +849,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
                     # Log traceback
                     self.logger.error(traceback.format_exc())
                 message = "Error while updating hyperparameters"
-                return False, message, self.policyid, {}, 403
+                return False, message, self.policyid, {}, 403, [], None
 
         # Check whether to update the posterior or not
         if update_posterior:
@@ -855,7 +866,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
                     # Log traceback
                     self.logger.error(traceback.format_exc())
                 message = "Error while updating posteriors"
-                return False, message, self.policyid, {}, 404
+                return False, message, self.policyid, {}, 404, [], self.last_hyperparam_update_id
 
         # Return the parameters
         try:
@@ -875,9 +886,9 @@ class MixedEffectsAlgorithm(RLAlgorithm):
                 # Log traceback
                 self.logger.error(traceback.format_exc())
             message = "Error while returning parameters"
-            return False, message, self.policyid, {}, 406
+            return False, message, self.policyid, {}, 406, [], self.last_hyperparam_update_id
 
-        return True, None, self.policyid, return_dict, None
+        return True, None, self.policyid, return_dict, None, self.last_update_users_list, self.last_hyperparam_update_id
 
     @staticmethod
     def make_state(params: dict) -> list:

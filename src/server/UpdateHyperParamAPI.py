@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from src.server import db, app
 from src.server.auth.auth import token_required
-from src.server.tables import RLActionSelection
+from src.server.tables import RLActionSelection, RLHyperParamUpdateRequest
 from src.server.helpers import return_fail_response
 
 
@@ -18,11 +18,8 @@ import traceback
 import csv
 
 # @shared_task(ignore_result=False)
-def update_hyperparam_task():
+def update_hyperparam_task(id):
     """Background task for updating hyper-parameters"""
-
-    # Sleep 10 seconds
-    time.sleep(10)
 
     try:
 
@@ -38,13 +35,32 @@ def update_hyperparam_task():
             # Get the algorithm
             algorithm = app.config.get("ALGORITHM")
 
-            status, message, _, _, _ = algorithm.update(data,
+            status, message, _, _, ec, _, _ = algorithm.update(data,
                                                     update_posterior=False,
                                                     update_hyperparam=True,
-                                                    use_data=False)
+                                                    use_data=False,
+                                                    request_id=id)
         
             if not status:
                 app.logger.error("Error updating hyper-parameters: %s", message)
+                app.logger.error(traceback.format_exc())
+
+                # Update the request status to failed
+                request = RLHyperParamUpdateRequest.query.filter_by(id=id).first()
+                request.request_status = "Failed"
+                request.request_message = message
+                request.request_error_code = ec
+                request.completed_timestamp = datetime.datetime.now()
+                db.session.commit()
+            else:
+                app.logger.info("Updated hyper-parameters")
+
+                # Update the request status to completed
+                request = RLHyperParamUpdateRequest.query.filter_by(id=id).first()
+                request.request_status = "Completed"
+                request.completed_timestamp = datetime.datetime.now()
+                db.session.commit()
+
 
     except Exception as e:
         app.logger.error("Error updating hyper-parameters: %s", e)
@@ -123,9 +139,30 @@ class UpdateHyperParamAPI(MethodView):
             if not status:
                 return return_fail_response(message, 500, ec)
 
+            # Create a new entry in the RLHyperParamUpdateRequest table
+            new_request = RLHyperParamUpdateRequest(backup_location=location, 
+                                                    request_timestamp=timenow,
+                                                    request_status="Pending",
+                                                    request_message=None,
+                                                    request_error_code=None,
+                                                    completed_timestamp=None)
+
+            try:
+                db.session.add(new_request)
+                db.session.commit()
+            except Exception as e:
+                app.logger.error("Error adding new request to RLHyperParamUpdateRequest table: %s", e)
+                app.logger.error(traceback.format_exc())
+                if app.config.get("DEBUG"):
+                    print(e)
+                    traceback.print_exc()
+                return return_fail_response("Some error occurred. Please try again.", 500, 402)
+            
+            request_id = new_request.id
+
             # Send the data to the rl algorithm update
             # task_result = update_hyperparam_task.delay()
-            bg_task = threading.Thread(target=update_hyperparam_task)
+            bg_task = threading.Thread(target=update_hyperparam_task, args=(request_id,))
             bg_task.daemon = True
             bg_task.start()
             
