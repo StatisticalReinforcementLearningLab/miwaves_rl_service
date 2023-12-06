@@ -68,7 +68,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -95,7 +95,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -176,7 +176,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -202,7 +202,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -284,7 +284,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -310,7 +310,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "user_id": userid,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -391,7 +391,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -417,7 +417,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "user_id": userid,
                         "finished_ema": False,
                         "activity_question_response": "NA",
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -498,7 +498,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -605,7 +605,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=True,
                     activity_question_response=False,
                     app_use_flag=True,
-                    cannabis_use=[0, 0, 0, 0, 0, 0, 1]
+                    cannabis_use=[22, 23]
                 )),
                 content_type='application/json'
             )
@@ -632,7 +632,6 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": True,
                         "activity_question_response": False,
                         "app_use_flag": True,
-                        "cannabis_use": "NA",
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -713,7 +712,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=True,
                     activity_question_response=False,
                     app_use_flag=True,
-                    cannabis_use=[0, 0, 0, 0, 0, 0, 1]
+                    cannabis_use=[22, 23]
                 )),
                 content_type='application/json'
             )
@@ -820,7 +819,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -847,7 +846,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
                         "policy_id": action_data['policy_id'],
@@ -927,7 +926,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -954,7 +953,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "act_prob": action_data['act_prob'],
                         "policy_id": action_data['policy_id'],
@@ -1034,7 +1033,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1061,7 +1060,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": 9.52,
                         "act_prob": action_data['act_prob'],
@@ -1142,7 +1141,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1169,7 +1168,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "policy_id": action_data['policy_id'],
@@ -1249,7 +1248,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1276,7 +1275,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -1356,7 +1355,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1383,7 +1382,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -1463,7 +1462,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1490,7 +1489,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -1570,7 +1569,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1597,7 +1596,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -1678,7 +1677,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1705,7 +1704,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -1785,7 +1784,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1812,7 +1811,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -1892,7 +1891,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -1919,7 +1918,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -1999,7 +1998,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -2026,7 +2025,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -2106,7 +2105,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -2133,7 +2132,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -2213,7 +2212,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -2240,7 +2239,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -2321,7 +2320,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -2348,7 +2347,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -2367,7 +2366,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -2448,7 +2447,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -2537,7 +2536,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -2665,7 +2664,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -2753,7 +2752,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -2780,7 +2779,7 @@ class TestDecisionTimeEndAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],

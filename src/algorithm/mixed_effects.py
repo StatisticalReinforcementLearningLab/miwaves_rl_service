@@ -937,12 +937,20 @@ class MixedEffectsAlgorithm(RLAlgorithm):
         S2 = time_of_day
 
         # TODO: Change this to hourly timings
-        if recent_cannabis_use.size == 0:
-            S3 = 0
-        elif np.any(recent_cannabis_use != 0):
-            S3 = 0
-        elif np.all(recent_cannabis_use == 0):
+        # if recent_cannabis_use.size == 0:
+        #     S3 = 0
+        # elif np.any(recent_cannabis_use != 0):
+        #     S3 = 0
+        # elif np.all(recent_cannabis_use == 0):
+        #     S3 = 1
+        
+        if recent_cannabis_use.size == 0 and reward >= 2:
+            # check if the user finished the current EMA
+            # If they did, and no cannabis use was report, S3 = 1 (favorable)
             S3 = 1
+        else:
+            # If they did not, and hence did not report cb use we assume that they used.
+            S3 = 0 
 
         return [S1, S2, S3]
 

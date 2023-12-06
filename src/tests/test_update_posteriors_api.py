@@ -67,7 +67,7 @@ class TestUpdatePosteriorsAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -94,7 +94,7 @@ class TestUpdatePosteriorsAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -139,7 +139,7 @@ class TestUpdatePosteriorsAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -166,7 +166,7 @@ class TestUpdatePosteriorsAPI(BaseTestCase):
                         "finished_ema": False,
                         "activity_question_response": "NA",
                         "app_use_flag": False,
-                        "cannabis_use": "NA",
+                        "cannabis_use": [],
                         "action_taken": action_data['action'],
                         "seed": action_data['seed'],
                         "act_prob": action_data['act_prob'],
@@ -264,7 +264,7 @@ class TestUpdatePosteriorsAPI(BaseTestCase):
 #                     finished_ema=False,
 #                     activity_question_response="NA",
 #                     app_use_flag=False,
-#                     cannabis_use="NA"
+#                     cannabis_use=[]
 #                 )),
 #                 content_type='application/json'
 #             )
@@ -291,7 +291,7 @@ class TestUpdatePosteriorsAPI(BaseTestCase):
 #                         "finished_ema": False,
 #                         "activity_question_response": "NA",
 #                         "app_use_flag": False,
-#                         "cannabis_use": "NA",
+#                         "cannabis_use": [],
 #                         "action_taken": action_data['action'],
 #                         "seed": action_data['seed'],
 #                         "act_prob": action_data['act_prob'],

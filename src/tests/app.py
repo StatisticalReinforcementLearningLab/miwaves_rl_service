@@ -275,12 +275,12 @@ def run_simulation():
                     activity_question = "NA"
                     survey_completion = False
                     app_use_flag = True
-                    reported_cannabis_use = "NA"
+                    reported_cannabis_use = []
                 else:
                     activity_question = "NA"
                     survey_completion = False
                     app_use_flag = False
-                    reported_cannabis_use = "NA"
+                    reported_cannabis_use = []
                 
                 # Send the ema data to get action for the user
                 payload = {

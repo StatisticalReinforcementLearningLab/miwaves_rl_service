@@ -66,7 +66,7 @@ class TestActionsAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=False,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -127,7 +127,7 @@ class TestActionsAPI(BaseTestCase):
                     finished_ema=False,
                     activity_question_response="NA",
                     app_use_flag=True,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -188,7 +188,7 @@ class TestActionsAPI(BaseTestCase):
                     finished_ema=True,
                     activity_question_response=False,
                     app_use_flag=True,
-                    cannabis_use=[0, 0, 0, 0, 0, 0, 1]
+                    cannabis_use=[20, 21, 22]
                 )),
                 content_type='application/json'
             )
@@ -289,7 +289,7 @@ class TestActionsAPI(BaseTestCase):
                     finished_ema=True,
                     activity_question_response="NA",
                     app_use_flag=True,
-                    cannabis_use=[0, 0, 0, 0, 0, 0, 1]
+                    cannabis_use=[20, 21, 22]
                 )),
                 content_type='application/json'
             )
@@ -344,7 +344,7 @@ class TestActionsAPI(BaseTestCase):
                     finished_ema=True,
                     activity_question_response="NA",
                     app_use_flag=True,
-                    cannabis_use=[0, 0, 0, 0, 0, 0, 1]
+                    cannabis_use=[20, 21, 22]
                 )),
                 content_type='application/json'
             )
@@ -397,7 +397,7 @@ class TestActionsAPI(BaseTestCase):
                     user_id=userid,
                     activity_question_response="NA",
                     app_use_flag=True,
-                    cannabis_use=[0, 0, 0, 0, 0, 0, 1]
+                    cannabis_use=[20, 21, 22]
                 )),
                 content_type='application/json'
             )
@@ -451,7 +451,7 @@ class TestActionsAPI(BaseTestCase):
                     user_id=userid,
                     finished_ema=True,
                     app_use_flag=True,
-                    cannabis_use=[0, 0, 0, 0, 0, 0, 1]
+                    cannabis_use=[20, 21, 22]
                 )),
                 content_type='application/json'
             )
@@ -505,7 +505,7 @@ class TestActionsAPI(BaseTestCase):
                     user_id=userid,
                     finished_ema=False,
                     app_use_flag=True,
-                    cannabis_use="NA"
+                    cannabis_use=[]
                 )),
                 content_type='application/json'
             )
@@ -566,7 +566,7 @@ class TestActionsAPI(BaseTestCase):
                     user_id=userid,
                     finished_ema=True,
                     activity_question_response="NA",
-                    cannabis_use=[0, 0, 0, 0, 0, 0, 1]
+                    cannabis_use=[20, 21, 22]
                 )),
                 content_type='application/json'
             )

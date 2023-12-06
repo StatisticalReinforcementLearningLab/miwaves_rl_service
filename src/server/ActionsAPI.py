@@ -44,7 +44,9 @@ class ActionsAPI(MethodView):
                 post_data.get("activity_question_response"), bool
             ):
                 return False, "Please provide a valid activity question response.", 209
-            if not post_data.get("cannabis_use") or post_data.get("cannabis_use") == "NA":
+            if "cannabis_use" not in post_data.keys() or not isinstance(
+                post_data.get("cannabis_use"), list
+            ):
                 return False, "Please provide a valid cannabis use.", 210
         return True, None, None
 
