@@ -304,7 +304,7 @@ class UserActionHistory(db.Model):
         seed: int,
         act_prob: float,
         policy_id: int,
-        timestamp: datetime.datetime = datetime.datetime.now().astimezone().isoformat(),
+        timestamp: datetime.datetime,
     ):
         self.user_id = user_id
         self.decision_idx = decision_idx

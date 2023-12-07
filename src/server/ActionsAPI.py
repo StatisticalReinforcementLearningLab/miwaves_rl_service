@@ -1,3 +1,4 @@
+import datetime
 import traceback
 from src.server import app, db
 from src.server.auth.auth import token_required
@@ -274,6 +275,7 @@ class ActionsAPI(MethodView):
                             seed,
                             act_prob,
                             policy_id,
+                            timestamp=datetime.datetime.now().isoformat(),
                         )
 
                         db.session.add(new_useraction)
