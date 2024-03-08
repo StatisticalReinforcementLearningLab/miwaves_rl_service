@@ -65,18 +65,7 @@ class DecisionTimeEndAPI(MethodView):
                         error_code=301,
                     )
 
-                # if user study phase is ended, return fail
-                if user_status.study_phase == UserStudyPhaseEnum.ENDED:
-                    app.logger.error(
-                        "User study phase has ended for user: %s %s",
-                        user_id,
-                        user_status.study_phase,
-                    )
-                    return return_fail_response(
-                        message="User study phase has ended.", code=202, error_code=302
-                    )
-
-                # if user study phase has not ended, get the last decision time index data
+                # if user study phase has started, execute the algorithm
                 else:
                     # Get the algorithm
                     algorithm = app.config.get("ALGORITHM")
@@ -315,6 +304,35 @@ class DecisionTimeEndAPI(MethodView):
                     cb_use = value.get("cannabis_use")
                     if cb_use == "NA":
                         cb_use = []
+
+                    # Check if the decision index exists in the database
+                    # If it does, return fail
+                    try:
+                        rl_action_selection = RLActionSelection.query.filter_by(
+                            user_id=user_id,
+                            user_decision_idx=value.get("decision_index"),
+                        ).first()
+
+                        if rl_action_selection is not None:
+                            message = (
+                                "Decision index " + str(value.get("decision_index")) + " already exists in the database."
+                            )
+                            return (
+                                False,
+                                message,
+                                322
+                            )
+                    except Exception as e:
+                        if app.config.get("DEBUG"):
+                            print(e)
+                        app.logger.error(
+                            "Error occured in update_data: %s", traceback.format_exc()
+                        )
+                        return (
+                            False,
+                            "Some error occurred while checking if the decision index exists in the database.",
+                            323,
+                        )
 
                     # Update the algorithm with the data
                     try:
