@@ -379,7 +379,7 @@ class MixedEffectsAlgorithm(RLAlgorithm):
 
         else:
             # Otherwise get the user index and corresponding posteriors
-            user = self.user_list.index(user_id)
+            user = self.last_update_users_list.index(user_id)
             posterior_mean_user = self.posterior_mean[
                 user * num_params : (user + 1) * num_params
             ]
